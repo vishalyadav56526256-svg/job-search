@@ -1,0 +1,120 @@
+{% extends "employer/employerbase.html" %}
+{% load static %}
+
+{% block employer %}
+<style>
+  @keyframes hhFieldIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+  .pj-header{background:linear-gradient(135deg,color-mix(in srgb,var(--hh-primary) 10%,var(--hh-card-bg)) 0%,var(--hh-card-bg) 65%);border:1px solid var(--hh-card-border);border-radius:1.1rem;padding:1.25rem 1.5rem;margin-bottom:1.1rem;position:relative;overflow:hidden}
+  .pj-header::before{content:'';position:absolute;width:150px;height:150px;border-radius:50%;background:color-mix(in srgb,var(--hh-primary) 8%,transparent);top:-50px;right:-40px;pointer-events:none}
+  .pj-header h4{color:var(--hh-ink);font-weight:700;margin:0 0 .2rem}
+  .pj-header p{color:var(--hh-muted);margin:0;font-size:.88rem}
+
+  .pj-card{background:var(--hh-card-bg);border:1px solid var(--hh-card-border);border-radius:1.25rem;padding:1.75rem;box-shadow:0 8px 24px rgba(0,0,0,.06);transition:background .4s}
+
+  .pj-section-label{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--hh-muted);margin-bottom:.75rem;padding-bottom:.4rem;border-bottom:1px solid var(--hh-card-border)}
+
+  .pj-field{animation:hhFieldIn .45s ease both}
+  .pj-field:nth-child(1){animation-delay:.05s}.pj-field:nth-child(2){animation-delay:.10s}
+  .pj-field:nth-child(3){animation-delay:.15s}.pj-field:nth-child(4){animation-delay:.20s}
+  .pj-field:nth-child(5){animation-delay:.25s}.pj-field:nth-child(6){animation-delay:.30s}
+
+  .pj-submit{width:100%;padding:.8rem;border:none!important;border-radius:999px!important;background:var(--hh-primary)!important;color:#fff!important;font-weight:700;font-size:1rem;cursor:pointer;transition:background .3s,transform .2s,box-shadow .2s!important}
+  .pj-submit:hover{background:var(--hh-primary-dark)!important;transform:translateY(-2px);box-shadow:0 8px 22px color-mix(in srgb,var(--hh-primary) 30%,transparent)!important}
+  .pj-submit:active{transform:scale(.97)}
+
+  .job-type-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem}
+  .jt-btn{flex:1;min-width:100px;padding:.55rem .5rem;border-radius:.75rem;border:1.5px solid var(--hh-card-border);background:var(--hh-bg);color:var(--hh-navlink-color);font-weight:600;font-size:.82rem;cursor:pointer;text-align:center;transition:all .22s}
+  .jt-btn:hover{border-color:var(--hh-primary);color:var(--hh-primary)}
+  .jt-btn.active{background:var(--hh-primary)!important;border-color:var(--hh-primary)!important;color:#fff!important;box-shadow:0 4px 12px color-mix(in srgb,var(--hh-primary) 28%,transparent)}
+  #job_type_select{display:none}
+</style>
+
+<div class="row">
+  <div class="col-12 col-lg-9 col-xl-8 mx-auto">
+
+    <div class="pj-header hh-reveal">
+      <h4><i class="ti ti-circle-plus me-2" style="color:var(--hh-primary);"></i>Post a New Job</h4>
+      <p>Fill in the details below and reach thousands of job seekers.</p>
+    </div>
+
+    <div class="pj-card hh-reveal hh-d1">
+      <form method="post" class="row g-3">
+        {% csrf_token %}
+
+        <!-- Job Type visual toggle -->
+        <div class="col-12 pj-field">
+          <p class="pj-section-label">Job Type</p>
+          <div class="job-type-row">
+            <button type="button" class="jt-btn" onclick="selectJobType('full_time',this)"><i class="ti ti-briefcase me-1"></i>Full Time</button>
+            <button type="button" class="jt-btn" onclick="selectJobType('part_time',this)"><i class="ti ti-clock me-1"></i>Part Time</button>
+            <button type="button" class="jt-btn" onclick="selectJobType('internship',this)"><i class="ti ti-school me-1"></i>Internship</button>
+            <button type="button" class="jt-btn" onclick="selectJobType('contract',this)"><i class="ti ti-file-description me-1"></i>Contract</button>
+          </div>
+          <select name="job_type" id="job_type_select" required>
+            <option value="" disabled selected>Select</option>
+            <option value="full_time">Full Time</option>
+            <option value="part_time">Part Time</option>
+            <option value="internship">Internship</option>
+            <option value="contract">Contract</option>
+          </select>
+        </div>
+
+        <div class="col-12 pj-field">
+          <p class="pj-section-label">Job Details</p>
+        </div>
+
+        <div class="col-md-6 pj-field">
+          <label for="jt" class="form-label">Job Title</label>
+          <input type="text" name="title" id="jt" class="form-control" placeholder="e.g. Senior Python Developer">
+        </div>
+        <div class="col-md-6 pj-field">
+          <label for="sal" class="form-label">Salary (₹ per annum)</label>
+          <input type="number" name="salary" id="sal" class="form-control" placeholder="e.g. 600000">
+        </div>
+        <div class="col-md-6 pj-field">
+          <label for="loc" class="form-label">Location</label>
+          <input type="text" name="location" id="loc" class="form-control" placeholder="City or Remote">
+        </div>
+        <div class="col-md-3 pj-field">
+          <label for="vac" class="form-label">Vacancies</label>
+          <input type="number" name="vacancy" id="vac" class="form-control" placeholder="1">
+        </div>
+        <div class="col-md-3 pj-field">
+          <label for="dead" class="form-label">Deadline</label>
+          <input type="date" name="deadline" id="dead" class="form-control">
+        </div>
+
+        <div class="col-12 pj-field">
+          <p class="pj-section-label" style="margin-top:.5rem;">Skills & Description</p>
+        </div>
+
+        <div class="col-12 pj-field">
+          <label for="skill" class="form-label">Skills Required <small style="color:var(--hh-muted);font-weight:400;">(comma separated)</small></label>
+          <input type="text" list="skills" name="skills_required" id="skill" class="form-control" placeholder="e.g. Python, Django, React">
+          <datalist id="skills">{% for s in all_skills %}<option value="{{ s.skill_name }}">{% endfor %}</datalist>
+        </div>
+        <div class="col-12 pj-field">
+          <label for="desc" class="form-label">Job Description</label>
+          <textarea name="description" id="desc" class="form-control" style="min-height:140px;" placeholder="Describe the role, responsibilities, requirements..."></textarea>
+        </div>
+
+        <div class="col-12 mt-2 pj-field">
+          <button type="submit" class="pj-submit">
+            <i class="ti ti-send me-2"></i>Post Job
+          </button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function selectJobType(val, btn) {
+  document.getElementById('job_type_select').value = val;
+  document.querySelectorAll('.jt-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,163 @@
+{% extends "employer/employerbase.html" %}
+{% load static %}
+
+{% block employer %}
+<style>
+  @keyframes hhRowIn  {from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+  @keyframes hhAvatarIn{0%{transform:scale(.7) rotate(-8deg);opacity:0}70%{transform:scale(1.05) rotate(2deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+
+  .va-header{background:linear-gradient(135deg,color-mix(in srgb,var(--hh-primary) 10%,var(--hh-card-bg)) 0%,var(--hh-card-bg) 65%);border:1px solid var(--hh-card-border);border-radius:1.1rem;padding:1.25rem 1.5rem;margin-bottom:1.1rem;position:relative;overflow:hidden}
+  .va-header::before{content:'';position:absolute;width:140px;height:140px;border-radius:50%;background:color-mix(in srgb,var(--hh-primary) 8%,transparent);top:-50px;right:-40px;pointer-events:none}
+  .va-header h4{color:var(--hh-ink);font-weight:700;margin:0 0 .2rem;position:relative;z-index:1}
+  .va-header p{color:var(--hh-muted);margin:0;font-size:.88rem;position:relative;z-index:1}
+
+  .va-table-card{background:var(--hh-card-bg);border:1px solid var(--hh-card-border);border-radius:1.25rem;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.05)}
+  .va-table{width:100%;border-collapse:separate;border-spacing:0}
+  .va-table thead tr{background:color-mix(in srgb,var(--hh-primary) 7%,var(--hh-bg))}
+  .va-table thead th{color:var(--hh-muted);font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:.85rem 1rem;border-bottom:1px solid var(--hh-card-border);white-space:nowrap}
+  .va-table tbody tr{transition:background .18s;animation:hhRowIn .4s ease both}
+  .va-table tbody tr:nth-child(1){animation-delay:.05s}.va-table tbody tr:nth-child(2){animation-delay:.10s}.va-table tbody tr:nth-child(3){animation-delay:.15s}.va-table tbody tr:nth-child(4){animation-delay:.20s}
+  .va-table tbody tr:hover{background:color-mix(in srgb,var(--hh-primary) 5%,var(--hh-bg))}
+  .va-table td{padding:.85rem 1rem;color:var(--hh-ink);border-bottom:1px solid var(--hh-card-border);font-size:.88rem;vertical-align:middle}
+  .va-table tbody tr:last-child td{border-bottom:none}
+
+  .va-avatar{width:46px;height:46px;border-radius:.75rem;object-fit:cover;border:2px solid var(--hh-primary);transition:transform .2s}
+  .va-avatar:hover{transform:scale(1.06)}
+  .va-no-pic{width:46px;height:46px;border-radius:.75rem;background:color-mix(in srgb,var(--hh-primary) 10%,var(--hh-bg));display:flex;align-items:center;justify-content:center;color:var(--hh-primary);font-weight:700;font-size:.85rem;border:1px solid var(--hh-card-border)}
+
+  .skill-chip{display:inline-block;border-radius:999px;background:color-mix(in srgb,var(--hh-primary) 10%,var(--hh-bg));border:1px solid color-mix(in srgb,var(--hh-primary) 22%,transparent);color:var(--hh-primary-dark);padding:.18rem .65rem;font-size:.72rem;font-weight:600;margin:.15rem;transition:transform .18s}
+  .skill-chip:hover{transform:scale(1.06)}
+
+  .view-btn{display:inline-flex;align-items:center;gap:5px;background:var(--hh-primary);color:#fff;border:none;border-radius:999px;padding:.35rem .85rem;font-size:.78rem;font-weight:600;cursor:pointer;transition:background .22s,transform .18s}
+  .view-btn:hover{background:var(--hh-primary-dark);transform:translateY(-1px)}
+
+  .status-select{background:var(--hh-bg)!important;border:1.5px solid var(--hh-card-border)!important;border-radius:.65rem!important;color:var(--hh-ink)!important;padding:.4rem .7rem!important;font-size:.82rem;font-weight:600;cursor:pointer;min-width:120px;transition:border-color .25s!important}
+  .status-select:focus{border-color:var(--hh-primary)!important;box-shadow:none!important}
+
+  /* Modal */
+  .modal-content{background:var(--hh-card-bg)!important;border:1px solid var(--hh-card-border)!important;border-radius:1.25rem!important;color:var(--hh-ink)!important}
+  .modal-header{border-color:var(--hh-card-border)!important;padding:1rem 1.25rem}
+  .modal-header h5{color:var(--hh-ink);font-weight:700}
+  .modal-footer{border-color:var(--hh-card-border)!important}
+  .modal-avatar{width:110px;height:110px;border-radius:1rem;object-fit:cover;border:3px solid var(--hh-primary);box-shadow:0 8px 20px rgba(0,0,0,.1);animation:hhAvatarIn .5s cubic-bezier(.34,1.56,.64,1) both}
+  .modal-kv{display:flex;align-items:baseline;gap:8px;padding:.45rem 0;border-bottom:1px solid var(--hh-card-border)}
+  .modal-kv:last-child{border-bottom:none}
+  .modal-kv-label{font-weight:700;font-size:.8rem;color:var(--hh-muted);min-width:110px;flex-shrink:0;text-transform:uppercase;letter-spacing:.03em}
+  .modal-kv-value{color:var(--hh-ink);font-size:.9rem}
+  .modal-close-btn{background:var(--hh-bg)!important;color:var(--hh-ink)!important;border:1px solid var(--hh-card-border)!important;border-radius:999px!important;font-weight:600;padding:.45rem 1.1rem;font-size:.85rem;transition:background .2s!important}
+  .modal-close-btn:hover{background:var(--hh-card-border)!important}
+
+  .va-empty{text-align:center;padding:3rem 1rem;color:var(--hh-muted)}
+  .va-empty i{font-size:2.5rem;opacity:.25;display:block;margin-bottom:.75rem}
+</style>
+
+<div class="va-header hh-reveal">
+  <h4><i class="ti ti-users me-2" style="color:var(--hh-primary);"></i>Applications for — {{ job.title }}</h4>
+  <p>Review and manage candidates who applied for this role.</p>
+</div>
+
+<div class="va-table-card hh-reveal hh-d1">
+  <div style="overflow-x:auto;">
+    <table class="va-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Candidate</th>
+          <th>Contact</th>
+          <th>Skills</th>
+          <th>View</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for app in applications %}
+        <tr>
+          <td style="color:var(--hh-muted);font-weight:600;">{{ forloop.counter }}</td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              {% if app.jobseeker.picture %}
+              <img src="{{ app.jobseeker.picture.url }}" alt="" class="va-avatar">
+              {% else %}
+              <div class="va-no-pic">{{ app.jobseeker.first_name|first }}{{ app.jobseeker.last_name|first }}</div>
+              {% endif %}
+              <div>
+                <div style="font-weight:700;color:var(--hh-ink);">{{ app.jobseeker.first_name }} {{ app.jobseeker.last_name }}</div>
+                <div style="font-size:.76rem;color:var(--hh-muted);">{{ app.jobseeker.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td style="color:var(--hh-muted);">{{ app.jobseeker.contact_no|default:"—" }}</td>
+          <td>
+            {% for s in app.jobseeker.skills.all %}
+            <span class="skill-chip">{{ s }}</span>
+            {% empty %}<span style="color:var(--hh-muted);font-size:.78rem;">No skills</span>{% endfor %}
+          </td>
+          <td>
+            <button class="view-btn" data-bs-toggle="modal" data-bs-target="#modal{{ app.jobseeker.id }}">
+              <i class="ti ti-eye"></i>Details
+            </button>
+          </td>
+          <td>
+            <form action="{% url 'updatestatus' appid=app.id %}" method="post">
+              {% csrf_token %}
+              <select name="status" class="status-select" onchange="this.form.submit()">
+                <option value="pending"     {% if app.status == 'pending'     %}selected{% endif %}>Pending</option>
+                <option value="shortlisted" {% if app.status == 'shortlisted' %}selected{% endif %}>Shortlisted</option>
+                <option value="selected"    {% if app.status == 'selected'    %}selected{% endif %}>Selected</option>
+                <option value="rejected"    {% if app.status == 'rejected'    %}selected{% endif %}>Rejected</option>
+              </select>
+            </form>
+          </td>
+        </tr>
+
+        <!-- Detail Modal -->
+        <div class="modal fade" id="modal{{ app.jobseeker.id }}" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title"><i class="ti ti-user me-2" style="color:var(--hh-primary);"></i>{{ app.jobseeker.first_name }} {{ app.jobseeker.last_name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body p-4">
+                <div class="row g-3">
+                  <div class="col-md-4 text-center">
+                    {% if app.jobseeker.picture %}
+                    <img src="{{ app.jobseeker.picture.url }}" alt="" class="modal-avatar">
+                    {% else %}
+                    <div style="width:110px;height:110px;border-radius:1rem;background:color-mix(in srgb,var(--hh-primary) 10%,var(--hh-bg));display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:800;color:var(--hh-primary);margin:0 auto;border:3px solid var(--hh-primary);">{{ app.jobseeker.first_name|first }}</div>
+                    {% endif %}
+                    <p style="margin-top:.75rem;font-weight:700;color:var(--hh-ink);">{{ app.jobseeker.first_name }} {{ app.jobseeker.last_name }}</p>
+                  </div>
+                  <div class="col-md-8">
+                    <div class="modal-kv"><span class="modal-kv-label">Email</span><span class="modal-kv-value">{{ app.jobseeker.email }}</span></div>
+                    <div class="modal-kv"><span class="modal-kv-label">Contact</span><span class="modal-kv-value">{{ app.jobseeker.contact_no|default:"—" }}</span></div>
+                    <div class="modal-kv"><span class="modal-kv-label">Date of Birth</span><span class="modal-kv-value">{{ app.jobseeker.dob|default:"—" }}</span></div>
+                    <div class="modal-kv"><span class="modal-kv-label">Gender</span><span class="modal-kv-value">{{ app.jobseeker.get_gender_display|default:"—" }}</span></div>
+                    <div class="modal-kv"><span class="modal-kv-label">Skills</span>
+                      <span class="modal-kv-value">
+                        {% for s in app.jobseeker.skills.all %}<span class="skill-chip">{{ s }}</span>{% empty %}—{% endfor %}
+                      </span>
+                    </div>
+                    {% if app.jobseeker.resume %}
+                    <div class="modal-kv"><span class="modal-kv-label">Resume</span>
+                      <span class="modal-kv-value"><a href="{{ app.jobseeker.resume.url }}" target="_blank" style="color:var(--hh-primary);font-weight:600;">View Resume →</a></span>
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="modal-close-btn" data-bs-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {% empty %}
+        <tr><td colspan="6"><div class="va-empty"><i class="ti ti-users-group"></i>No applicants yet for this job.</div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

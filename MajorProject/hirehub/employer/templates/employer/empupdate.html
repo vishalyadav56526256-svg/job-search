@@ -1,0 +1,172 @@
+{% extends "employer/employerbase.html" %}
+{% load static %}
+{% block employer %}
+<style>
+  @keyframes hhTabContent{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+  .upd-header{background:linear-gradient(135deg,color-mix(in srgb,var(--hh-primary) 10%,var(--hh-card-bg)) 0%,var(--hh-card-bg) 65%);border:1px solid var(--hh-card-border);border-radius:1.1rem;padding:1.25rem 1.5rem;margin-bottom:1.1rem;position:relative;overflow:hidden}
+  .upd-header::before{content:'';position:absolute;width:150px;height:150px;border-radius:50%;background:color-mix(in srgb,var(--hh-accent) 8%,transparent);top:-50px;right:-40px;pointer-events:none}
+  .upd-header h4{color:var(--hh-ink);font-weight:700;margin:0 0 .2rem}
+  .upd-header p{color:var(--hh-muted);margin:0;font-size:.88rem}
+
+  .upd-tabs{display:flex;gap:.4rem;flex-wrap:wrap;border:none;margin-bottom:0;padding:.2rem;background:var(--hh-bg);border-radius:.85rem;border:1px solid var(--hh-card-border)}
+  .upd-tabs .nav-link{border:none;border-radius:.65rem;padding:.55rem 1rem;font-weight:600;font-size:.84rem;color:var(--hh-navlink-color);background:transparent;transition:background .22s,color .22s;display:flex;align-items:center;gap:6px}
+  .upd-tabs .nav-link:hover{background:var(--hh-navlink-hover-bg);color:var(--hh-navlink-hover-color)}
+  .upd-tabs .nav-link.active{background:var(--hh-primary);color:#fff;box-shadow:0 4px 14px color-mix(in srgb,var(--hh-primary) 30%,transparent)}
+
+  .upd-panel{background:var(--hh-card-bg);border:1px solid var(--hh-card-border);border-radius:1.1rem;padding:1.5rem;margin-top:.75rem;transition:background .4s}
+  .tab-pane.show.active .upd-panel{animation:hhTabContent .4s ease both}
+  .upd-section-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem;padding-bottom:.6rem;border-bottom:2px solid var(--hh-card-border)}
+  .upd-section-title h5{margin:0;font-weight:700;color:var(--hh-ink);display:flex;align-items:center;gap:8px}
+  .upd-section-title h5 i{color:var(--hh-primary)}
+  .upd-tag{background:color-mix(in srgb,var(--hh-primary) 10%,var(--hh-bg));border:1px solid color-mix(in srgb,var(--hh-primary) 22%,transparent);color:var(--hh-primary-dark);border-radius:999px;padding:.22rem .75rem;font-size:.75rem;font-weight:700;transition:background .4s}
+
+  .profile-box{border:2px dashed var(--hh-card-border);border-radius:1rem;background:var(--hh-bg);text-align:center;padding:.85rem;transition:border-color .25s,background .4s}
+  .profile-box:hover{border-color:var(--hh-primary)}
+  .profile-image{width:130px;height:130px;border-radius:1rem;object-fit:cover;border:2px solid var(--hh-primary);box-shadow:0 8px 20px rgba(0,0,0,.1);transition:transform .25s}
+  .profile-image:hover{transform:scale(1.04)}
+  .hint-text{font-size:.78rem;color:var(--hh-muted);margin:.4rem 0 0}
+
+  .company-info-card{background:var(--hh-bg);border:1px solid var(--hh-card-border);border-radius:1rem;padding:1.1rem;transition:background .4s}
+
+  .upd-save-btn{background:var(--hh-primary)!important;color:#fff!important;border:none!important;border-radius:999px!important;padding:.7rem 2rem;font-weight:700;font-size:.95rem;cursor:pointer;width:100%;transition:background .3s,transform .2s,box-shadow .2s!important}
+  .upd-save-btn:hover{background:var(--hh-primary-dark)!important;transform:translateY(-2px);box-shadow:0 8px 22px color-mix(in srgb,var(--hh-primary) 30%,transparent)!important}
+  .upd-save-btn:active{transform:scale(.97)}
+  .upd-add-btn{background:var(--hh-accent)!important;color:#fff!important;border:none!important;border-radius:999px!important;padding:.5rem 1.2rem;font-weight:700;font-size:.85rem;cursor:pointer;transition:filter .2s,transform .18s!important;display:inline-flex;align-items:center;gap:6px}
+  .upd-add-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+
+  .alert-info-custom{background:color-mix(in srgb,var(--hh-primary) 10%,var(--hh-bg));border:1px solid color-mix(in srgb,var(--hh-primary) 22%,transparent);color:var(--hh-primary-dark);border-radius:.85rem;padding:.85rem 1rem;font-size:.88rem;transition:background .4s}
+  .alert-success-custom{background:color-mix(in srgb,#22c55e 10%,var(--hh-bg));border:1px solid color-mix(in srgb,#22c55e 25%,transparent);color:#166534;border-radius:.85rem;padding:.85rem 1rem;font-size:.88rem;transition:background .4s}
+</style>
+
+<div class="row">
+  <div class="col-12">
+    <div class="upd-header hh-reveal">
+      <h4><i class="ti ti-edit me-2" style="color:var(--hh-primary);"></i>Update Your Profile</h4>
+      <p>Keep your details current and hire fast.</p>
+    </div>
+
+    <ul class="nav upd-tabs hh-reveal hh-d1" id="updTab" role="tablist">
+      <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab1" type="button"><i class="ti ti-user"></i>Personal</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab2" type="button"><i class="ti ti-building"></i>Company</button></li>
+    </ul>
+
+    <div class="tab-content hh-reveal hh-d2">
+
+      <!-- TAB 1: Personal -->
+      <div class="tab-pane fade show active" id="tab1">
+        <div class="upd-panel">
+          <div class="upd-section-title">
+            <h5><i class="ti ti-user-circle"></i>Personal Details</h5>
+            <span class="upd-tag">Your Profile</span>
+          </div>
+          <form method="post" enctype="multipart/form-data" class="row g-3">
+            {% csrf_token %}
+            <div class="col-md-7 my-auto">
+              <label class="form-label">Profile Picture</label>
+              <input type="file" name="picture" class="form-control">
+              <p class="hint-text">A clear headshot helps job seekers trust your profile.</p>
+            </div>
+            <div class="col-md-5">
+              <div class="profile-box">
+                {% if emp.picture %}<img src="{{ emp.picture.url }}" class="profile-image" alt="Profile">
+                {% else %}<img src="{% static 'admin/assets/images/user/avatar-2.jpg' %}" class="profile-image" alt="Profile">{% endif %}
+              </div>
+            </div>
+            <div class="col-md-6"><label class="form-label">First Name</label><input type="text" name="first_name" value="{{ emp.first_name }}" class="form-control"></div>
+            <div class="col-md-6"><label class="form-label">Last Name</label><input type="text" name="last_name" value="{{ emp.last_name }}" class="form-control"></div>
+            <div class="col-md-6"><label class="form-label">Date of Birth</label><input type="date" name="dob" value="{{ emp.dob|date:'Y-m-d' }}" class="form-control"></div>
+            <div class="col-md-6">
+              <label class="form-label">Gender</label>
+              <select name="gender" class="form-select">
+                <option value="" disabled>Select Gender</option>
+                <option value="female" {% if emp.gender == 'female' %}selected{% endif %}>Female</option>
+                <option value="male"   {% if emp.gender == 'male'   %}selected{% endif %}>Male</option>
+                <option value="na"     {% if emp.gender == 'na'     %}selected{% endif %}>Prefer not to say</option>
+              </select>
+            </div>
+            <div class="col-md-6"><label class="form-label">Contact No</label><input type="number" name="contact_no" value="{{ emp.contact_no }}" class="form-control"></div>
+            <div class="col-md-6">
+              <label class="form-label">Email</label>
+              <input type="email" name="email" value="{{ emp.email }}" class="form-control" disabled>
+              <p class="hint-text">Email is locked to keep account identity consistent.</p>
+            </div>
+            <div class="col-12"><label class="form-label">Designation</label><input type="text" name="designation" value="{{ emp.designation }}" class="form-control"></div>
+            <div class="col-12 mt-2"><button type="submit" class="upd-save-btn"><i class="ti ti-device-floppy me-2"></i>Save Changes</button></div>
+          </form>
+        </div>
+      </div>
+
+      <!-- TAB 2: Company -->
+      <div class="tab-pane fade" id="tab2">
+        <div class="upd-panel">
+          <div class="upd-section-title">
+            <h5><i class="ti ti-building"></i>Company Details</h5>
+            <span class="upd-tag">Company</span>
+          </div>
+
+          {% if not emp.company %}
+          <div class="alert-info-custom mb-3"><i class="ti ti-info-circle me-2"></i>You have not added company details yet. Fill the form below to add your company.</div>
+          <form method="post" action="{% url 'add_company' %}" enctype="multipart/form-data" class="row g-3">
+            {% csrf_token %}
+            <div class="col-md-6"><label class="form-label">Company Name</label><input type="text" name="company_name" class="form-control"></div>
+            <div class="col-md-6"><label class="form-label">Contact No</label><input type="number" name="contact_no" class="form-control"></div>
+            <div class="col-md-6"><label class="form-label">Company Email</label><input type="email" name="email" class="form-control"></div>
+            <div class="col-md-6"><label class="form-label">Company Logo</label><input type="file" name="logo" class="form-control"></div>
+            <div class="col-md-6"><label class="form-label">Industry</label><input type="text" name="industry" class="form-control" placeholder="IT / Finance / Manufacturing"></div>
+            <div class="col-md-6"><label class="form-label">Established Date</label><input type="date" name="established_at" class="form-control"></div>
+            <div class="col-12"><label class="form-label">Website URL</label><input type="text" name="website" class="form-control"></div>
+            <div class="col-12"><label class="form-label">Location</label><textarea name="location" class="form-control"></textarea></div>
+            <div class="col-12"><label class="form-label">Details / Description</label><textarea name="details" class="form-control"></textarea></div>
+            <div class="col-12 mt-2"><button type="submit" class="upd-save-btn"><i class="ti ti-building me-2"></i>Add Company</button></div>
+          </form>
+
+          {% else %}
+          <div class="alert-success-custom mb-3"><i class="ti ti-circle-check me-2"></i>Company details already added.</div>
+          <div class="company-info-card mb-4">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              {% if emp.company.logo %}<img src="{{ emp.company.logo.url }}" alt="Logo" style="width:72px;height:72px;border-radius:1rem;object-fit:cover;border:1px solid var(--hh-card-border);">
+              {% else %}<div style="width:72px;height:72px;border-radius:1rem;border:1px dashed var(--hh-card-border);background:var(--hh-bg);display:flex;align-items:center;justify-content:center;color:var(--hh-muted);font-size:.75rem;">No Logo</div>{% endif %}
+              <div>
+                <h5 style="color:var(--hh-ink);font-weight:800;margin:0 0 .2rem;">{{ emp.company.company_name }}</h5>
+                <p style="color:var(--hh-muted);margin:0;font-size:.85rem;">{{ emp.company.industry }}</p>
+              </div>
+            </div>
+            <div class="row g-2" style="font-size:.88rem;color:var(--hh-muted);">
+              <div class="col-md-6"><strong style="color:var(--hh-ink);">Email:</strong> {{ emp.company.email }}</div>
+              <div class="col-md-6"><strong style="color:var(--hh-ink);">Contact:</strong> {{ emp.company.contact_no }}</div>
+              <div class="col-md-6"><strong style="color:var(--hh-ink);">Established:</strong> {{ emp.company.established_at|default:"—" }}</div>
+              <div class="col-md-6"><strong style="color:var(--hh-ink);">Website:</strong> {{ emp.company.website|default:"—" }}</div>
+              <div class="col-12"><strong style="color:var(--hh-ink);">Location:</strong> {{ emp.company.location }}</div>
+            </div>
+          </div>
+
+          <div class="text-center mb-3">
+            <button class="upd-add-btn" type="button" data-bs-toggle="collapse" data-bs-target="#editCompanyForm">
+              <i class="ti ti-edit"></i>Edit Company Details
+            </button>
+          </div>
+
+          <div class="collapse" id="editCompanyForm">
+            <form method="post" action="{% url 'add_company' %}" enctype="multipart/form-data" class="row g-3">
+              {% csrf_token %}
+              <div class="col-md-6"><label class="form-label">Company Name</label><input type="text" name="company_name" value="{{ emp.company.company_name }}" class="form-control"></div>
+              <div class="col-md-6"><label class="form-label">Contact No</label><input type="number" name="contact_no" value="{{ emp.company.contact_no }}" class="form-control"></div>
+              <div class="col-md-6"><label class="form-label">Company Email</label><input type="email" name="email" value="{{ emp.company.email }}" class="form-control"></div>
+              <div class="col-md-6"><label class="form-label">Company Logo</label><input type="file" name="logo" class="form-control"></div>
+              <div class="col-md-6"><label class="form-label">Industry</label><input type="text" name="industry" value="{{ emp.company.industry }}" class="form-control"></div>
+              <div class="col-md-6"><label class="form-label">Established Date</label><input type="date" name="established_at" value="{{ emp.company.established_at|date:'Y-m-d' }}" class="form-control"></div>
+              <div class="col-12"><label class="form-label">Website URL</label><input type="text" name="website" value="{{ emp.company.website }}" class="form-control"></div>
+              <div class="col-12"><label class="form-label">Location</label><textarea name="location" class="form-control">{{ emp.company.location }}</textarea></div>
+              <div class="col-12"><label class="form-label">Details / Description</label><textarea name="details" class="form-control">{{ emp.company.details }}</textarea></div>
+              <div class="col-12 mt-2"><button type="submit" class="upd-save-btn"><i class="ti ti-device-floppy me-2"></i>Update Company</button></div>
+            </form>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

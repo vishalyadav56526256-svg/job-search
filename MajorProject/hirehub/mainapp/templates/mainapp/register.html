@@ -1,0 +1,315 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+
+{% block maintitle %}HireHub - Register{% endblock %}
+
+{% block extra_head %}
+<style>
+    @keyframes hhAuthHeroIn  { from{opacity:0;transform:translateY(-24px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes hhAuthCardIn  { from{opacity:0;transform:translateY(36px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+    @keyframes hhOrbDrift    { 0%,100%{transform:translate(0,0)} 50%{transform:translate(16px,-18px)} }
+    @keyframes hhShine       { 0%{background-position:-300% center} 100%{background-position:300% center} }
+    @keyframes hhFieldIn     { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes hhDotBounce   { 0%,100%{transform:translateY(0)} 45%{transform:translateY(-5px)} }
+
+    .auth-section-bg { background:var(--hh-bg); transition:background .4s; padding-top:2.5rem; padding-bottom:3rem; }
+
+    /* ── Hero ── */
+    .auth-hero {
+        background: linear-gradient(145deg, var(--hh-footer) 0%, var(--hh-footer-grad) 100%);
+        position:relative; overflow:hidden; padding:4rem 0;
+    }
+    .auth-hero .hh-orb { position:absolute; border-radius:50%; filter:blur(60px); opacity:.18; pointer-events:none; }
+    .auth-hero .hh-orb-1 { width:240px; height:240px; top:-70px; left:-70px; background:var(--hh-primary); animation:hhOrbDrift 9s ease-in-out infinite; }
+    .auth-hero .hh-orb-2 { width:180px; height:180px; bottom:-40px; right:-40px; background:var(--hh-accent); animation:hhOrbDrift 11s ease-in-out 2s infinite reverse; }
+
+    .auth-hero-inner { position:relative; z-index:1; text-align:center; animation:hhAuthHeroIn .6s cubic-bezier(.22,1,.36,1) .1s both; }
+
+    .auth-hero-badge {
+        display:inline-flex; align-items:center; gap:7px;
+        background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2);
+        border-radius:999px; padding:5px 16px;
+        font-size:.82rem; font-weight:700; color:#fff; margin-bottom:1rem;
+    }
+    .auth-hero-badge .live-dot { width:7px; height:7px; border-radius:50%; background:var(--hh-accent); animation:hhDotBounce 2s ease-in-out infinite; }
+
+    .auth-hero h1 { color:#fff; }
+    .auth-hero-shine {
+        background: linear-gradient(90deg,#fff 0%,var(--hh-accent) 40%,#fff 70%,var(--hh-accent) 100%);
+        background-size:300% auto;
+        -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+        animation:hhShine 4s linear 1s infinite;
+    }
+    .auth-hero p { color:rgba(255,255,255,.7); }
+
+    /* ── Card ── */
+    .auth-card {
+        background:var(--hh-card-bg) !important;
+        border:1px solid var(--hh-card-border) !important;
+        border-radius:1.5rem !important;
+        box-shadow:0 24px 56px rgba(0,0,0,.12);
+        transition:background .4s, border-color .3s !important;
+        animation:hhAuthCardIn .7s cubic-bezier(.22,1,.36,1) .3s both;
+    }
+    .auth-card h4 { color:var(--hh-ink); }
+    .auth-card .text-secondary { color:var(--hh-navlink-color) !important; }
+
+    .auth-logo-mark {
+        width:52px; height:52px; border-radius:14px;
+        background:color-mix(in srgb,var(--hh-primary) 14%,var(--hh-bg));
+        display:flex; align-items:center; justify-content:center;
+        font-size:1.4rem; font-weight:800; color:var(--hh-primary);
+        margin:0 auto 1.25rem; letter-spacing:-1px; transition:background .4s;
+    }
+
+    /* ── User type toggle ── */
+    .usertype-toggle { display:flex; gap:10px; margin-bottom:1.5rem; }
+    .ut-btn {
+        flex:1; padding:.65rem 1rem; border-radius:999px; cursor:pointer;
+        border:1.5px solid var(--hh-card-border); background:var(--hh-bg);
+        color:var(--hh-navlink-color); font-weight:600; font-size:.88rem;
+        display:flex; align-items:center; justify-content:center; gap:7px;
+        transition:all .25s !important;
+    }
+    .ut-btn:hover { border-color:var(--hh-primary); color:var(--hh-primary); }
+    .ut-btn.active {
+        background:var(--hh-primary) !important; border-color:var(--hh-primary) !important;
+        color:#fff !important; box-shadow:0 4px 14px color-mix(in srgb,var(--hh-primary) 30%,transparent);
+    }
+
+    /* hidden native select (still submitted in form) */
+    #usertype { display:none; }
+
+    /* ── Form fields ── */
+    .auth-label {
+        display:block; font-weight:600; font-size:.88rem;
+        color:var(--hh-ink); margin-bottom:.3rem;
+    }
+
+    .auth-input {
+        width:100%; background:var(--hh-bg) !important;
+        border:1.5px solid var(--hh-card-border) !important;
+        border-radius:.65rem !important; padding:.68rem .9rem !important;
+        color:var(--hh-ink) !important; font-size:.93rem;
+        transition:border-color .25s, box-shadow .25s, background .4s !important;
+        outline:none;
+    }
+    .auth-input::placeholder { color:var(--hh-navlink-color); opacity:.7; }
+    .auth-input:focus {
+        border-color:var(--hh-primary) !important;
+        box-shadow:0 0 0 3px color-mix(in srgb,var(--hh-primary) 18%,transparent) !important;
+    }
+
+    /* Password toggle */
+    .auth-pwd-wrap { position:relative; }
+    .auth-pwd-toggle {
+        position:absolute; right:.9rem; top:50%; transform:translateY(-50%);
+        background:none; border:none; color:var(--hh-navlink-color);
+        cursor:pointer; font-size:.9rem; padding:0; transition:color .2s;
+    }
+    .auth-pwd-toggle:hover { color:var(--hh-primary); }
+
+    /* Strength bar */
+    .strength-bar-wrap { height:4px; border-radius:2px; background:var(--hh-card-border); margin-top:.4rem; overflow:hidden; }
+    .strength-bar { height:100%; width:0; border-radius:2px; transition:width .4s, background .4s; }
+
+    /* Stagger field groups */
+    .auth-field-group { animation:hhFieldIn .5s ease both; }
+    .auth-field-group:nth-child(1) { animation-delay:.38s; }
+    .auth-field-group:nth-child(2) { animation-delay:.46s; }
+    .auth-field-group:nth-child(3) { animation-delay:.54s; }
+    .auth-field-group:nth-child(4) { animation-delay:.62s; }
+    .auth-field-group:nth-child(5) { animation-delay:.70s; }
+    .auth-field-group:nth-child(6) { animation-delay:.78s; }
+
+    /* ── Submit ── */
+    .auth-submit {
+        width:100%; padding:.75rem; border:none !important; border-radius:999px !important;
+        background:var(--hh-primary) !important; color:#fff !important;
+        font-weight:700; font-size:1rem; cursor:pointer;
+        transition:background .3s, transform .2s, box-shadow .2s !important;
+        animation:hhFieldIn .5s ease .88s both;
+    }
+    .auth-submit:hover {
+        background:var(--hh-primary-dark) !important; transform:translateY(-2px);
+        box-shadow:0 8px 22px color-mix(in srgb,var(--hh-primary) 35%,transparent) !important;
+    }
+    .auth-submit:active { transform:scale(.97); }
+
+    /* ── Footer link ── */
+    .auth-foot-link { color:var(--hh-primary) !important; font-weight:600; text-decoration:none; transition:opacity .2s; }
+    .auth-foot-link:hover { opacity:.8; text-decoration:underline; }
+    .auth-foot-text { color:var(--hh-navlink-color); }
+    .auth-divider { border-color:var(--hh-card-border) !important; }
+
+    /* Section label */
+    .auth-section-label {
+        font-size:.72rem; font-weight:700; letter-spacing:.06em;
+        text-transform:uppercase; color:var(--hh-navlink-color);
+        margin-bottom:.75rem; padding-bottom:.4rem;
+        border-bottom:1px solid var(--hh-card-border);
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+
+<!-- HERO -->
+<section class="auth-hero">
+    <div class="hh-orb hh-orb-1"></div>
+    <div class="hh-orb hh-orb-2"></div>
+    <div class="container">
+        <div class="auth-hero-inner">
+            <div class="auth-hero-badge"><span class="live-dot"></span>Free to Join</div>
+            <h1 class="fw-bold mb-2">Create Your <span class="auth-hero-shine">Account</span></h1>
+            <p class="mb-0">Join HireHub and start your journey today.</p>
+        </div>
+    </div>
+</section>
+
+<!-- FORM -->
+<section class="container-fluid auth-section-bg">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8">
+                <div class="card auth-card">
+                    <div class="card-body p-4 p-md-5">
+
+                        <div class="auth-logo-mark">H.</div>
+
+                        <h4 class="fw-bold mb-1 text-center">Register</h4>
+                        <p class="text-secondary text-center mb-4" style="font-size:.9rem;">Fill in your details to create a new account.</p>
+
+                        {% if messages %}
+                            {% for m in messages %}
+                                <div class="alert alert-{{m.tags}} alert-dismissible fade show mb-3" role="alert">
+                                    {{m}}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        <form method="post" id="regForm">
+                            {% csrf_token %}
+
+                            <!-- User type visual toggle -->
+                            <p class="auth-section-label">I am a</p>
+                            <div class="usertype-toggle mb-4">
+                                <button type="button" class="ut-btn" id="ut-jobseeker" onclick="selectType('jobseeker')">
+                                    <i class="fas fa-user-tie"></i> Job Seeker
+                                </button>
+                                <button type="button" class="ut-btn" id="ut-employer" onclick="selectType('employer')">
+                                    <i class="fas fa-building"></i> Employer
+                                </button>
+                            </div>
+                            <select id="usertype" name="usertype" required>
+                                <option value="" selected disabled>Select</option>
+                                <option value="jobseeker">Job Seeker</option>
+                                <option value="employer">Employer</option>
+                            </select>
+
+                            <!-- Name -->
+                            <p class="auth-section-label">Personal Info</p>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6 auth-field-group">
+                                    <label for="first_name" class="auth-label">First Name</label>
+                                    <input type="text" class="auth-input" id="first_name" name="first_name" placeholder="John" required>
+                                </div>
+                                <div class="col-md-6 auth-field-group">
+                                    <label for="last_name" class="auth-label">Last Name</label>
+                                    <input type="text" class="auth-input" id="last_name" name="last_name" placeholder="Doe" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3 auth-field-group">
+                                <label for="email" class="auth-label">Email</label>
+                                <input type="email" class="auth-input" id="email" name="email" placeholder="you@example.com" required>
+                            </div>
+
+                            <div class="mb-4 auth-field-group">
+                                <label for="contact_no" class="auth-label">Contact No</label>
+                                <input type="tel" class="auth-input" id="contact_no" name="contact_no" placeholder="+1 555 000 0000" required>
+                            </div>
+
+                            <!-- Password -->
+                            <p class="auth-section-label">Security</p>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6 auth-field-group">
+                                    <label for="pwd" class="auth-label">Password</label>
+                                    <div class="auth-pwd-wrap">
+                                        <input type="password" class="auth-input" id="pwd" name="pwd" placeholder="Create password" required style="padding-right:2.8rem !important;" oninput="checkStrength(this.value)">
+                                        <button type="button" class="auth-pwd-toggle" onclick="togglePwd('pwd',this)" aria-label="Show password"><i class="fas fa-eye"></i></button>
+                                    </div>
+                                    <div class="strength-bar-wrap mt-2"><div class="strength-bar" id="strengthBar"></div></div>
+                                    <small id="strengthLabel" style="font-size:.75rem;color:var(--hh-navlink-color);"></small>
+                                </div>
+                                <div class="col-md-6 auth-field-group">
+                                    <label for="confirm_pwd" class="auth-label">Confirm Password</label>
+                                    <div class="auth-pwd-wrap">
+                                        <input type="password" class="auth-input" id="confirm_pwd" name="confirm_pwd" placeholder="Repeat password" required style="padding-right:2.8rem !important;">
+                                        <button type="button" class="auth-pwd-toggle" onclick="togglePwd('confirm_pwd',this)" aria-label="Show confirm password"><i class="fas fa-eye"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="auth-submit">
+                                <i class="fas fa-user-plus me-2"></i>Create Account
+                            </button>
+                        </form>
+
+                        <hr class="auth-divider my-4">
+                        <p class="text-center mb-0 auth-foot-text" style="font-size:.9rem;">
+                            Already have an account?
+                            <a href="{% url 'login' %}" class="auth-foot-link ms-1">Login</a>
+                        </p>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* ── User type toggle ── */
+function selectType(type) {
+    document.getElementById('usertype').value = type;
+    document.getElementById('ut-jobseeker').classList.toggle('active', type === 'jobseeker');
+    document.getElementById('ut-employer').classList.toggle('active', type === 'employer');
+}
+
+/* ── Password show/hide ── */
+function togglePwd(id, btn) {
+    var inp = document.getElementById(id);
+    var icon = btn.querySelector('i');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    icon.className = inp.type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+}
+
+/* ── Password strength ── */
+function checkStrength(val) {
+    var bar = document.getElementById('strengthBar');
+    var lbl = document.getElementById('strengthLabel');
+    var score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    var levels = [
+        { w:'0%',   bg:'transparent', txt:'' },
+        { w:'25%',  bg:'#ef4444',     txt:'Weak' },
+        { w:'50%',  bg:'#f97316',     txt:'Fair' },
+        { w:'75%',  bg:'#eab308',     txt:'Good' },
+        { w:'100%', bg:'#22c55e',     txt:'Strong' }
+    ];
+    var l = val.length === 0 ? levels[0] : levels[score] || levels[1];
+    bar.style.width = l.w;
+    bar.style.background = l.bg;
+    lbl.textContent = l.txt;
+    lbl.style.color = l.bg;
+}
+</script>
+{% endblock %}

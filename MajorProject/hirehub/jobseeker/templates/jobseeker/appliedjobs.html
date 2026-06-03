@@ -1,0 +1,322 @@
+{% extends "jobseeker/jobseekerbase.html" %}
+{% load static %}
+
+{% block jobseeker %}
+<style>
+  @keyframes hhRowIn   { from{opacity:0;transform:translateX(-12px)} to{opacity:1;transform:translateX(0)} }
+  @keyframes hhStepIn  { from{opacity:0;transform:scale(.85)} to{opacity:1;transform:scale(1)} }
+  @keyframes hhCheckPop { 0%{transform:scale(0) rotate(-20deg)} 70%{transform:scale(1.15) rotate(3deg)} 100%{transform:scale(1) rotate(0)} }
+  @keyframes hhPulseGreen { 0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.5)} 50%{box-shadow:0 0 0 7px transparent} }
+
+  /* ── Page header card ── */
+  .aj-header {
+    background: linear-gradient(135deg,
+      color-mix(in srgb,var(--hh-primary) 10%,var(--hh-card-bg)) 0%,
+      var(--hh-card-bg) 70%);
+    border:1px solid var(--hh-card-border);
+    border-radius:1.1rem; padding:1.25rem 1.5rem;
+    margin-bottom:1.25rem;
+    position:relative; overflow:hidden;
+  }
+  .aj-header::before {
+    content:''; position:absolute; width:160px; height:160px; border-radius:50%;
+    background:color-mix(in srgb,var(--hh-primary) 8%,transparent);
+    top:-60px; right:-40px; pointer-events:none;
+  }
+  .aj-header h4 { color:var(--hh-ink); font-weight:700; margin:0 0 .2rem; }
+  .aj-header p  { color:var(--hh-muted); margin:0; font-size:.9rem; }
+
+  /* ── Table card ── */
+  .aj-table-card {
+    background:var(--hh-card-bg);
+    border:1px solid var(--hh-card-border);
+    border-radius:1.1rem; overflow:hidden;
+    box-shadow:0 6px 20px rgba(0,0,0,.05);
+  }
+
+  .aj-table { width:100%; border-collapse:separate; border-spacing:0; }
+  .aj-table thead tr {
+    background:color-mix(in srgb,var(--hh-primary) 7%,var(--hh-bg));
+  }
+  .aj-table thead th {
+    color:var(--hh-muted); font-size:.75rem; font-weight:700;
+    text-transform:uppercase; letter-spacing:.05em;
+    padding:.85rem 1rem; border-bottom:1px solid var(--hh-card-border);
+    white-space:nowrap;
+  }
+  .aj-table tbody tr {
+    transition:background .18s;
+    animation:hhRowIn .4s ease both;
+  }
+  .aj-table tbody tr:nth-child(1) { animation-delay:.05s; }
+  .aj-table tbody tr:nth-child(2) { animation-delay:.10s; }
+  .aj-table tbody tr:nth-child(3) { animation-delay:.15s; }
+  .aj-table tbody tr:nth-child(4) { animation-delay:.20s; }
+  .aj-table tbody tr:nth-child(5) { animation-delay:.25s; }
+  .aj-table tbody tr:hover { background:color-mix(in srgb,var(--hh-primary) 5%,var(--hh-bg)); }
+  .aj-table td {
+    padding:.85rem 1rem; color:var(--hh-ink);
+    border-bottom:1px solid var(--hh-card-border); font-size:.9rem;
+    vertical-align:middle;
+  }
+  .aj-table tbody tr:last-child td { border-bottom:none; }
+
+  .aj-job-title { font-weight:600; color:var(--hh-ink); }
+  .aj-company   { font-size:.82rem; color:var(--hh-muted); }
+
+  .aj-salary-badge {
+    background:color-mix(in srgb,var(--hh-accent) 12%,var(--hh-bg));
+    color:var(--hh-primary-dark); border:1px solid color-mix(in srgb,var(--hh-accent) 25%,transparent);
+    border-radius:999px; padding:.22rem .7rem; font-size:.78rem; font-weight:600;
+    transition:background .4s;
+  }
+
+  .aj-status-btn {
+    background:var(--hh-primary) !important; color:#fff !important;
+    border:none !important; border-radius:999px !important;
+    padding:.35rem .9rem; font-size:.8rem; font-weight:600; cursor:pointer;
+    transition:background .25s, transform .18s !important;
+  }
+  .aj-status-btn:hover { background:var(--hh-primary-dark) !important; transform:translateY(-1px); }
+
+  /* empty state */
+  .aj-empty {
+    text-align:center; padding:3rem 1rem; color:var(--hh-muted);
+  }
+  .aj-empty i { font-size:2.5rem; opacity:.25; display:block; margin-bottom:.75rem; }
+
+  /* ── Stepper Modal ── */
+  .modal-content {
+    background:var(--hh-card-bg) !important;
+    border:1px solid var(--hh-card-border) !important;
+    border-radius:1.25rem !important;
+    color:var(--hh-ink) !important;
+  }
+  .modal-header {
+    border-color:var(--hh-card-border) !important;
+    padding:1rem 1.25rem;
+  }
+  .modal-header h5 { color:var(--hh-ink); font-weight:700; }
+  .modal-footer { border-color:var(--hh-card-border) !important; }
+
+  .stepper-box {
+    padding:1.25rem .5rem;
+  }
+
+  .stepper-step {
+    display:flex; margin-bottom:28px; position:relative;
+    animation:hhStepIn .45s ease both;
+  }
+  .stepper-step:nth-child(1) { animation-delay:.05s; }
+  .stepper-step:nth-child(2) { animation-delay:.15s; }
+  .stepper-step:nth-child(3) { animation-delay:.25s; }
+  .stepper-step:last-child   { margin-bottom:0; }
+
+  .stepper-line {
+    position:absolute; left:19px; top:40px; bottom:-28px; width:2px;
+    background:var(--hh-card-border); z-index:1; transition:background .4s;
+  }
+  .stepper-step:last-child .stepper-line { display:none; }
+
+  /* Completed line glows */
+  .stepper-completed .stepper-line { background:color-mix(in srgb,#22c55e 40%,var(--hh-card-border)); }
+
+  .stepper-circle {
+    width:40px; height:40px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    margin-right:14px; z-index:2; font-weight:700; font-size:.9rem;
+    transition:background .3s, border-color .3s;
+  }
+
+  .stepper-completed .stepper-circle {
+    background:#22c55e; color:#fff; border:none;
+    animation:hhCheckPop .5s cubic-bezier(.34,1.56,.64,1) both,
+              hhPulseGreen 2.5s ease 1s infinite;
+  }
+  .stepper-active .stepper-circle {
+    border:2px solid var(--hh-primary); color:var(--hh-primary);
+    background:color-mix(in srgb,var(--hh-primary) 8%,var(--hh-card-bg));
+  }
+  .stepper-pending .stepper-circle {
+    border:2px solid var(--hh-card-border); color:var(--hh-muted);
+    background:var(--hh-bg);
+  }
+  .stepper-rejected .stepper-circle  { background:#ef4444; color:#fff; border:none; }
+  .stepper-selected .stepper-circle  { background:#22c55e; color:#fff; border:none; animation:hhCheckPop .5s ease both; }
+
+  .stepper-content { flex:1; }
+  .stepper-title {
+    font-weight:700; margin-bottom:4px;
+    font-size:.92rem;
+  }
+  .stepper-completed .stepper-title,
+  .stepper-active .stepper-title    { color:var(--hh-ink); }
+  .stepper-pending .stepper-title   { color:var(--hh-muted); }
+
+  .stepper-status {
+    display:inline-block; font-size:.75rem; font-weight:600;
+    padding:2px 10px; border-radius:999px; margin-top:4px;
+  }
+  .stepper-completed .stepper-status { background:color-mix(in srgb,#22c55e 14%,var(--hh-bg)); color:#166534; }
+  .stepper-active    .stepper-status { background:color-mix(in srgb,var(--hh-primary) 12%,var(--hh-bg)); color:var(--hh-primary-dark); }
+  .stepper-pending   .stepper-status { background:var(--hh-bg); color:var(--hh-muted); }
+
+  .stepper-time { font-size:.75rem; color:var(--hh-muted); margin-top:3px; }
+
+  .modal-close-btn {
+    background:var(--hh-bg) !important; color:var(--hh-ink) !important;
+    border:1px solid var(--hh-card-border) !important; border-radius:999px !important;
+    font-weight:600; padding:.45rem 1.1rem; font-size:.85rem;
+    transition:background .2s !important;
+  }
+  .modal-close-btn:hover { background:var(--hh-card-border) !important; }
+</style>
+
+<!-- Page Header -->
+<div class="aj-header hh-reveal">
+  <h4><i class="ti ti-briefcase me-2" style="color:var(--hh-primary);"></i>Applied Jobs</h4>
+  <p>Track all your applications and their current status here.</p>
+</div>
+
+<!-- Table -->
+<div class="aj-table-card hh-reveal hh-d1">
+  <table class="aj-table">
+    <thead>
+      <tr>
+        <th>Job</th>
+        <th>Salary</th>
+        <th>Deadline</th>
+        <th>Applied At</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for app in applications %}
+      <tr>
+        <td>
+          <div class="aj-job-title">{{ app.job.title }}</div>
+          <div class="aj-company">
+            <i class="ti ti-building me-1" style="font-size:.75rem;"></i>
+            {{ app.job.company.company_name }}
+          </div>
+        </td>
+        <td>
+          <span class="aj-salary-badge">&#8377; {{ app.job.salary }}</span>
+        </td>
+        <td style="color:var(--hh-muted); font-size:.85rem;">{{ app.job.deadline }}</td>
+        <td style="color:var(--hh-muted); font-size:.85rem;">{{ app.applied_at|date }}</td>
+        <td>
+          <button class="aj-status-btn" data-bs-toggle="modal" data-bs-target="#modal{{ app.id }}">
+            <i class="ti ti-eye me-1"></i>Track
+          </button>
+        </td>
+      </tr>
+
+      <!-- Status Modal -->
+      <div class="modal fade" id="modal{{ app.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">
+                <i class="ti ti-map-pin me-2" style="color:var(--hh-primary);"></i>
+                Application Status — {{ app.job.title }}
+              </h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="stepper-box">
+
+                <!-- Step 1: Submitted (always done) -->
+                <div class="stepper-step stepper-completed">
+                  <div class="stepper-circle">
+                    <svg viewBox="0 0 16 16" fill="currentColor" height="16" width="16" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
+                    </svg>
+                  </div>
+                  <div class="stepper-line"></div>
+                  <div class="stepper-content">
+                    <div class="stepper-title">Application Submitted</div>
+                    <div class="stepper-status">Completed</div>
+                    <div class="stepper-time">{{ app.applied_at|date }}</div>
+                  </div>
+                </div>
+
+                <!-- Step 2: Shortlisted -->
+                {% if app.status == 'shortlisted' or app.status == 'selected' %}
+                <div class="stepper-step stepper-completed">
+                {% elif app.status == 'pending' %}
+                <div class="stepper-step stepper-active">
+                {% else %}
+                <div class="stepper-step stepper-pending">
+                {% endif %}
+                  <div class="stepper-circle">
+                    {% if app.status == 'shortlisted' or app.status == 'selected' %}
+                      <svg viewBox="0 0 16 16" fill="currentColor" height="14" width="14" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
+                      </svg>
+                    {% else %}2{% endif %}
+                  </div>
+                  <div class="stepper-line"></div>
+                  <div class="stepper-content">
+                    <div class="stepper-title">Under Review / Shortlisted</div>
+                    <div class="stepper-status">
+                      {% if app.status == 'shortlisted' or app.status == 'selected' %}Shortlisted
+                      {% elif app.status == 'pending' %}In Progress
+                      {% else %}Pending{% endif %}
+                    </div>
+                    <div class="stepper-time">Reviewed by hiring team</div>
+                  </div>
+                </div>
+
+                <!-- Step 3: Final Result -->
+                {% if app.status == 'selected' %}
+                <div class="stepper-step stepper-selected">
+                {% elif app.status == 'rejected' %}
+                <div class="stepper-step stepper-rejected">
+                {% else %}
+                <div class="stepper-step stepper-pending">
+                {% endif %}
+                  <div class="stepper-circle">
+                    {% if app.status == 'selected' %}
+                      <svg viewBox="0 0 16 16" fill="currentColor" height="14" width="14" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
+                      </svg>
+                    {% elif app.status == 'rejected' %}
+                      <i class="ti ti-x" style="font-size:.9rem;"></i>
+                    {% else %}3{% endif %}
+                  </div>
+                  <div class="stepper-content">
+                    <div class="stepper-title">Final Decision</div>
+                    <div class="stepper-status">{{ app.status|title }}</div>
+                    <div class="stepper-time">
+                      {% if app.status == 'selected' %}Congratulations! 🎉
+                      {% elif app.status == 'rejected' %}Better luck next time
+                      {% else %}Decision pending{% endif %}
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="modal-close-btn" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% empty %}
+      <tr>
+        <td colspan="5">
+          <div class="aj-empty">
+            <i class="ti ti-briefcase-off"></i>
+            You haven't applied for any job yet.
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

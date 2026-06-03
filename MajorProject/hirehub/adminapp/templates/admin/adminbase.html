@@ -1,0 +1,268 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="blue">
+<head>
+  <title>{% block title %}Admin Dashboard{% endblock %} | HireHub</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <link rel="stylesheet" href="{% static 'admin/assets/css/plugins/dataTables.bootstrap5.min.css' %}">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="{% static 'admin/assets/fonts/tabler-icons.min.css' %}">
+  <link rel="stylesheet" href="{% static 'admin/assets/fonts/feather.css' %}">
+  <link rel="stylesheet" href="{% static 'admin/assets/fonts/fontawesome.css' %}">
+  <link rel="stylesheet" href="{% static 'admin/assets/fonts/material.css' %}">
+  <link rel="stylesheet" href="{% static 'admin/assets/css/style.css' %}" id="main-style-link">
+  <link rel="stylesheet" href="{% static 'admin/assets/css/style-preset.css' %}">
+  <style>
+    [data-theme="blue"]{--hh-primary:#0ea5e9;--hh-primary-dark:#0369a1;--hh-accent:#22c55e;--hh-bg:#f1f5f9;--hh-ink:#0f172a;--hh-footer:#111827;--hh-footer-grad:#1f2937;--hh-card-bg:#ffffff;--hh-card-border:rgba(14,165,233,0.18);--hh-navlink-color:#334155;--hh-navlink-hover-bg:rgba(14,165,233,0.10);--hh-navlink-hover-color:#0369a1;--hh-brand-dot:#22c55e;--hh-muted:#64748b}
+    [data-theme="dark-gold"]{--hh-primary:#f59e0b;--hh-primary-dark:#d97706;--hh-accent:#fbbf24;--hh-bg:#0f0f0f;--hh-ink:#f5f0e8;--hh-footer:#050505;--hh-footer-grad:#0a0a0a;--hh-card-bg:rgba(20,17,5,0.95);--hh-card-border:rgba(245,158,11,0.25);--hh-navlink-color:#d4c5a0;--hh-navlink-hover-bg:rgba(245,158,11,0.12);--hh-navlink-hover-color:#fbbf24;--hh-brand-dot:#fbbf24;--hh-muted:#a09070}
+    [data-theme="beige-green"]{--hh-primary:#4d7c0f;--hh-primary-dark:#365314;--hh-accent:#84cc16;--hh-bg:#faf7f0;--hh-ink:#1c1917;--hh-footer:#14532d;--hh-footer-grad:#166534;--hh-card-bg:rgba(254,252,232,0.95);--hh-card-border:rgba(77,124,15,0.2);--hh-navlink-color:#3d2c12;--hh-navlink-hover-bg:rgba(77,124,15,0.10);--hh-navlink-hover-color:#365314;--hh-brand-dot:#84cc16;--hh-muted:#78614a}
+
+    @keyframes hhSpin{to{transform:rotate(360deg)}}
+    @keyframes hhLoaderOut{0%{opacity:1}100%{opacity:0;visibility:hidden}}
+    @keyframes hhSlideIn{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:translateX(0)}}
+    @keyframes hhFadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes hhDotBounce{0%,100%{transform:translateY(0)}45%{transform:translateY(-4px)}}
+    @keyframes hhPulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--hh-primary) 40%,transparent)}50%{box-shadow:0 0 0 8px transparent}}
+
+    #hhDashLoader{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:var(--hh-bg);transition:background .3s}
+    #hhDashLoader.hide{animation:hhLoaderOut .5s ease forwards;pointer-events:none}
+    .hh-loader-brand{font-weight:800;font-size:1.4rem;color:var(--hh-ink)}
+    .hh-loader-brand span{color:var(--hh-brand-dot)}
+    .hh-loader-ring{width:32px;height:32px;border-radius:50%;border:3px solid color-mix(in srgb,var(--hh-primary) 20%,transparent);border-top-color:var(--hh-primary);animation:hhSpin .7s linear infinite}
+
+    .hh-reveal{opacity:0;transform:translateY(22px);transition:opacity .55s cubic-bezier(.22,1,.36,1),transform .55s cubic-bezier(.22,1,.36,1)}
+    .hh-reveal.visible{opacity:1;transform:translateY(0)}
+    .hh-d1{transition-delay:.08s!important}.hh-d2{transition-delay:.16s!important}.hh-d3{transition-delay:.24s!important}
+
+    .pc-sidebar{background:linear-gradient(180deg,var(--hh-footer-grad) 0%,var(--hh-footer) 100%)!important;border-right:1px solid color-mix(in srgb,var(--hh-primary) 15%,transparent)!important;transition:background .4s!important}
+    .pc-sidebar .m-header{border-bottom:1px solid color-mix(in srgb,var(--hh-primary) 20%,transparent)!important;padding:1rem 1.2rem!important}
+    .pc-sidebar .b-brand{font-weight:800;font-size:1.3rem;color:#fff!important;text-decoration:none}
+    .pc-sidebar .b-brand::after{content:'.';color:var(--hh-accent);animation:hhDotBounce 2.4s ease-in-out infinite;display:inline-block}
+    .pc-sidebar .pc-mtext{color:rgba(255,255,255,.78)!important;font-weight:500;font-size:.9rem}
+    .pc-sidebar .pc-micon i{color:rgba(255,255,255,.55)!important}
+    .pc-sidebar .pc-link{border-radius:10px!important;margin:1px 8px!important;transition:background .22s,transform .18s!important}
+    .pc-sidebar .pc-link:hover,.pc-sidebar .pc-item.active .pc-link{background:color-mix(in srgb,var(--hh-primary) 18%,transparent)!important;transform:translateX(3px)}
+    .pc-sidebar .pc-link:hover .pc-mtext,.pc-sidebar .pc-item.active .pc-link .pc-mtext{color:#fff!important}
+    .pc-sidebar .pc-link:hover .pc-micon i,.pc-sidebar .pc-item.active .pc-link .pc-micon i{color:var(--hh-accent)!important}
+    .pc-sidebar .pc-caption label{color:color-mix(in srgb,var(--hh-accent) 70%,#fff)!important;font-size:.72rem;letter-spacing:.06em;font-weight:700}
+    .pc-sidebar .pc-submenu{background:rgba(0,0,0,.15)!important;border-radius:.65rem;margin:0 8px 4px}
+    .pc-sidebar .pc-submenu .pc-link{color:rgba(255,255,255,.65)!important;font-size:.85rem}
+    .pc-sidebar .pc-submenu .pc-link:hover{color:#fff!important}
+    .pc-sidebar .pc-item:nth-child(1){animation:hhSlideIn .4s ease .10s both}
+    .pc-sidebar .pc-item:nth-child(2){animation:hhSlideIn .4s ease .16s both}
+    .pc-sidebar .pc-item:nth-child(3){animation:hhSlideIn .4s ease .22s both}
+    .pc-sidebar .pc-item:nth-child(4){animation:hhSlideIn .4s ease .28s both}
+    .pc-sidebar .pc-item:nth-child(5){animation:hhSlideIn .4s ease .34s both}
+    .pc-sidebar .pc-item:nth-child(6){animation:hhSlideIn .4s ease .40s both}
+    .pc-sidebar .pc-item:nth-child(7){animation:hhSlideIn .4s ease .46s both}
+    .pc-sidebar .pc-item:nth-child(8){animation:hhSlideIn .4s ease .52s both}
+
+    .pc-header{background:var(--hh-card-bg)!important;border-bottom:1px solid var(--hh-card-border)!important;backdrop-filter:blur(8px);transition:background .4s!important}
+    .pc-header .pc-head-link{color:var(--hh-ink)!important}
+    .pc-header .header-search .form-control{background:var(--hh-bg)!important;border-color:var(--hh-card-border)!important;color:var(--hh-ink)!important;border-radius:999px!important}
+    .pc-header .header-search .form-control:focus{border-color:var(--hh-primary)!important}
+    .user-avtar{border:2px solid var(--hh-primary)!important;transition:border-color .3s,transform .2s!important}
+    .user-avtar:hover{transform:scale(1.06)}
+
+    .pc-container{background:var(--hh-bg)!important;transition:background .4s!important}
+    .pc-content{animation:hhFadeUp .55s cubic-bezier(.22,1,.36,1) .2s both}
+
+    .card{background:var(--hh-card-bg)!important;border:1px solid var(--hh-card-border)!important;border-radius:1rem!important;box-shadow:0 6px 20px rgba(0,0,0,.06)!important;color:var(--hh-ink)!important;transition:background .4s,border-color .3s!important}
+    .card h3,.card h4,.card h5,.card h6{color:var(--hh-ink)!important}
+    .card p,.card .text-secondary,.card .text-muted{color:var(--hh-muted)!important}
+    .table{color:var(--hh-ink)!important}
+    .table th{color:var(--hh-muted)!important;border-color:var(--hh-card-border)!important;font-size:.82rem;text-transform:uppercase;letter-spacing:.04em}
+    .table td{border-color:var(--hh-card-border)!important}
+    .table-hover tbody tr:hover{background:color-mix(in srgb,var(--hh-primary) 5%,var(--hh-bg))!important}
+
+    .form-control,.form-select{background:var(--hh-bg)!important;border:1.5px solid var(--hh-card-border)!important;border-radius:.65rem!important;color:var(--hh-ink)!important;padding:.65rem .9rem!important;font-size:.9rem;transition:border-color .25s,box-shadow .25s,background .4s!important}
+    .form-control::placeholder{color:var(--hh-muted);opacity:.7}
+    .form-control:focus,.form-select:focus{border-color:var(--hh-primary)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--hh-primary) 16%,transparent)!important;outline:none}
+    .form-label{color:var(--hh-ink);font-weight:600;font-size:.87rem;margin-bottom:.3rem}
+    .form-control:disabled{opacity:.5;cursor:not-allowed}
+
+    .pc-footer{background:linear-gradient(180deg,var(--hh-footer-grad) 0%,var(--hh-footer) 100%)!important;border-top:1px solid color-mix(in srgb,var(--hh-primary) 15%,transparent)!important;transition:background .4s!important}
+    .pc-footer p,.pc-footer a{color:rgba(255,255,255,.6)!important}
+    .pc-footer a:hover{color:var(--hh-accent)!important}
+
+    /* Admin badge on header */
+    .admin-role-badge{display:inline-flex;align-items:center;gap:5px;background:color-mix(in srgb,#ef4444 10%,var(--hh-bg));border:1px solid color-mix(in srgb,#ef4444 22%,transparent);color:#b91c1c;border-radius:999px;padding:2px 10px;font-size:.72rem;font-weight:700;margin-left:6px;transition:background .4s}
+
+    .theme-switcher{position:fixed;right:1rem;bottom:1rem;z-index:9000;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+    .theme-options{display:flex;flex-direction:column;gap:6px;background:var(--hh-card-bg);border:1px solid var(--hh-card-border);border-radius:16px;padding:10px;backdrop-filter:blur(10px);box-shadow:0 8px 32px rgba(0,0,0,.18);opacity:0;transform:translateY(12px) scale(.95);pointer-events:none;transition:opacity .25s ease,transform .25s cubic-bezier(.34,1.56,.64,1)}
+    .theme-options.open{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+    .theme-btn{display:flex;align-items:center;gap:10px;border:none;background:transparent;cursor:pointer;padding:7px 12px;border-radius:999px;font-size:13px;font-weight:600;color:var(--hh-ink);white-space:nowrap;transition:background .2s,transform .15s!important}
+    .theme-btn:hover{background:var(--hh-navlink-hover-bg);transform:translateX(-3px)}
+    .theme-btn.active-theme{background:var(--hh-navlink-hover-bg);color:var(--hh-navlink-hover-color)}
+    .theme-swatch{width:22px;height:22px;border-radius:50%;border:2px solid rgba(0,0,0,.12);flex-shrink:0}
+    .swatch-blue{background:linear-gradient(135deg,#0ea5e9 50%,#22c55e 50%)}
+    .swatch-gold{background:linear-gradient(135deg,#0f0f0f 50%,#f59e0b 50%)}
+    .swatch-green{background:linear-gradient(135deg,#faf7f0 50%,#4d7c0f 50%)}
+    .theme-toggle-fab{width:44px;height:44px;border-radius:50%;border:none;background:var(--hh-primary);color:#fff;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:transform .3s,background .4s!important;animation:hhPulse 2.8s ease-in-out 2s infinite}
+    .theme-toggle-fab:hover{transform:scale(1.1)}
+    .theme-toggle-fab.open{transform:rotate(45deg) scale(1.05);animation:none}
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+
+<body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
+  <div id="hhDashLoader"><div class="hh-loader-brand">HireHub<span>.</span></div><div class="hh-loader-ring"></div></div>
+  <div class="loader-bg" style="display:none;"><div class="loader-track"><div class="loader-fill"></div></div></div>
+
+  <!-- SIDEBAR -->
+  <nav class="pc-sidebar">
+    <div class="navbar-wrapper">
+      <div class="m-header"><a href="{% url 'index' %}" class="b-brand">HireHub</a></div>
+      <div class="navbar-content">
+        <ul class="pc-navbar">
+          <li class="pc-item pc-caption"><label>Overview</label><i class="ti ti-dashboard"></i></li>
+          <li class="pc-item">
+            <a href="{% url 'admindash' %}" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-dashboard"></i></span>
+              <span class="pc-mtext">Dashboard</span>
+            </a>
+          </li>
+
+          <li class="pc-item pc-caption"><label>Manage</label><i class="ti ti-settings"></i></li>
+
+          <li class="pc-item pc-hasmenu">
+            <a href="#!" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-color-swatch"></i></span>
+              <span class="pc-mtext">Categories</span>
+              <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+            </a>
+            <ul class="pc-submenu">
+              <li class="pc-item"><a class="pc-link" href="">Add Category</a></li>
+              <li class="pc-item"><a class="pc-link" href="">View Categories</a></li>
+            </ul>
+          </li>
+
+          <li class="pc-item pc-hasmenu">
+            <a href="#!" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-users"></i></span>
+              <span class="pc-mtext">Users</span>
+              <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+            </a>
+            <ul class="pc-submenu">
+              <li class="pc-item"><a class="pc-link" href="">Job Seekers</a></li>
+              <li class="pc-item"><a class="pc-link" href="">Employers</a></li>
+            </ul>
+          </li>
+
+          <li class="pc-item">
+            <a href="{% url 'viewenq' %}" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-message-dots"></i></span>
+              <span class="pc-mtext">Enquiries</span>
+            </a>
+          </li>
+
+          <li class="pc-item pc-caption"><label>Account</label><i class="ti ti-shield"></i></li>
+          <li class="pc-item">
+            <a href="{% url 'changepassword' %}" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-lock"></i></span>
+              <span class="pc-mtext">Change Password</span>
+            </a>
+          </li>
+          <li class="pc-item">
+            <a href="{% url 'adminlogout' %}" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-power"></i></span>
+              <span class="pc-mtext">Logout</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HEADER -->
+  <header class="pc-header">
+    <div class="header-wrapper">
+      <div class="me-auto pc-mob-drp">
+        <ul class="list-unstyled">
+          <li class="pc-h-item pc-sidebar-collapse"><a href="#" class="pc-head-link ms-0" id="sidebar-hide"><i class="ti ti-menu-2"></i></a></li>
+          <li class="pc-h-item pc-sidebar-popup"><a href="#" class="pc-head-link ms-0" id="mobile-collapse"><i class="ti ti-menu-2"></i></a></li>
+          <li class="pc-h-item d-none d-md-inline-flex"><form class="header-search"><i data-feather="search" class="icon-search"></i><input type="search" class="form-control" placeholder="Search here..."></form></li>
+        </ul>
+      </div>
+      <div class="ms-auto">
+        <ul class="list-unstyled">
+          <li class="dropdown pc-h-item header-user-profile">
+            <a class="pc-head-link dropdown-toggle arrow-none me-0" data-bs-toggle="dropdown" href="#" role="button" data-bs-auto-close="outside" aria-expanded="false">
+              <img src="{% static 'admin/assets/images/user/avatar-2.jpg' %}" alt="user" class="user-avtar">
+              <span style="color:var(--hh-ink);font-weight:600;">Admin</span>
+              <span class="admin-role-badge"><i class="ti ti-shield-check" style="font-size:.7rem;"></i>Super Admin</span>
+            </a>
+            <div class="dropdown-menu dropdown-user-profile dropdown-menu-end pc-h-dropdown">
+              <div class="dropdown-header">
+                <div class="d-flex mb-1">
+                  <div class="flex-shrink-0"><img src="{% static 'admin/assets/images/user/avatar-2.jpg' %}" alt="user" class="user-avtar wid-35"></div>
+                  <div class="flex-grow-1 ms-3">
+                    <h6 class="mb-1">Admin</h6>
+                    <span style="font-size:.82rem;color:var(--hh-muted);">{{ adminid }}</span>
+                  </div>
+                  <a href="{% url 'adminlogout' %}" class="pc-head-link bg-transparent"><i class="ti ti-power text-danger"></i></a>
+                </div>
+              </div>
+              <div class="tab-content">
+                <div class="tab-pane fade show active">
+                  <a href="{% url 'changepassword' %}" class="dropdown-item"><i class="ti ti-lock"></i><span>Change Password</span></a>
+                  <a href="{% url 'adminlogout' %}" class="dropdown-item"><i class="ti ti-power"></i><span>Logout</span></a>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="pc-container"><div class="pc-content">{% block admin %}{% endblock %}</div></div>
+
+  <!-- FOOTER -->
+  <footer class="pc-footer">
+    <div class="footer-wrapper container-fluid">
+      <div class="row">
+        <div class="col-sm my-1"><p class="m-0">HireHub Admin &hearts; developed by <a href="https://linkedin.com/in/er-asif" target="_blank">Mohammad Asif</a></p></div>
+        <div class="col-auto my-1"><ul class="list-inline footer-link mb-0"><li class="list-inline-item"><a href="{% url 'index' %}">Home</a></li></ul></div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- THEME SWITCHER -->
+  <div class="theme-switcher" id="themeSwitcher">
+    <div class="theme-options" id="themeOptions">
+      <button class="theme-btn active-theme" data-theme="blue" onclick="setTheme('blue',this)"><span class="theme-swatch swatch-blue"></span>White + Blue</button>
+      <button class="theme-btn" data-theme="dark-gold" onclick="setTheme('dark-gold',this)"><span class="theme-swatch swatch-gold"></span>Dark + Golden</button>
+      <button class="theme-btn" data-theme="beige-green" onclick="setTheme('beige-green',this)"><span class="theme-swatch swatch-green"></span>Beige + Green</button>
+    </div>
+    <button class="theme-toggle-fab" id="themeFab" onclick="toggleThemePanel()" aria-label="Change theme"><i class="fas fa-palette"></i></button>
+  </div>
+
+  <script src="{% static 'admin/assets/js/plugins/apexcharts.min.js' %}"></script>
+  <script src="{% static 'admin/assets/js/pages/dashboard-default.js' %}"></script>
+  <script src="{% static 'admin/assets/js/plugins/popper.min.js' %}"></script>
+  <script src="{% static 'admin/assets/js/plugins/simplebar.min.js' %}"></script>
+  <script src="{% static 'admin/assets/js/plugins/bootstrap.min.js' %}"></script>
+  <script src="{% static 'admin/assets/js/fonts/custom-font.js' %}"></script>
+  <script src="{% static 'admin/assets/js/pcoded.js' %}"></script>
+  <script src="{% static 'admin/assets/js/plugins/feather.min.js' %}"></script>
+  <script src="{% static 'admin/assets/js/plugins/sweetalert2.all.min.js' %}"></script>
+  <script>layout_change('light');change_box_container('false');layout_rtl_change('false');preset_change("preset-1");font_change("Public-Sans");</script>
+  <script>
+    window.addEventListener('load',function(){var l=document.getElementById('hhDashLoader');setTimeout(function(){l.classList.add('hide');setTimeout(function(){l.style.display='none';},520);},500);});
+    (function(){var io=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target);}});},{threshold:0.08});function attach(){document.querySelectorAll('.hh-reveal').forEach(function(el){io.observe(el);});}document.readyState==='loading'?document.addEventListener('DOMContentLoaded',attach):attach();})();
+    function toggleThemePanel(){document.getElementById('themeOptions').classList.toggle('open');document.getElementById('themeFab').classList.toggle('open');}
+    function setTheme(t,btn){document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem('hh_theme',t);}catch(e){}document.querySelectorAll('.theme-btn').forEach(function(b){b.classList.remove('active-theme');});btn.classList.add('active-theme');document.getElementById('themeOptions').classList.remove('open');document.getElementById('themeFab').classList.remove('open');}
+    (function(){try{var s=localStorage.getItem('hh_theme');if(s){document.documentElement.setAttribute('data-theme',s);var b=document.querySelector('[data-theme="'+s+'"]');if(b){document.querySelectorAll('.theme-btn').forEach(function(x){x.classList.remove('active-theme');});b.classList.add('active-theme');}}}catch(e){}})();
+    document.addEventListener('click',function(e){var sw=document.getElementById('themeSwitcher');if(sw&&!sw.contains(e.target)){document.getElementById('themeOptions').classList.remove('open');document.getElementById('themeFab').classList.remove('open');}});
+    {% if messages %}{% for message in messages %}
+    const Toast=Swal.mixin({toast:true,position:'top-end',showConfirmButton:false,timer:3000,timerProgressBar:true,didOpen:(t)=>{t.addEventListener('mouseenter',Swal.stopTimer);t.addEventListener('mouseleave',Swal.resumeTimer);}});
+    Toast.fire({icon:'{{message.tags}}',title:'{{message}}'});
+    {% endfor %}{% endif %}
+  </script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

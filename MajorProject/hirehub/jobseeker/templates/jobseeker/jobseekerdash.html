@@ -1,0 +1,400 @@
+{% extends "jobseeker/jobseekerbase.html" %}
+{% load static %}
+
+{% block jobseeker %}
+<style>
+  @keyframes hhStatIn    { from{opacity:0;transform:translateY(22px) scale(.95)} to{opacity:1;transform:translateY(0) scale(1)} }
+  @keyframes hhCountUp   { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes hhWaveHello { 0%,100%{transform:rotate(0)} 25%{transform:rotate(18deg)} 75%{transform:rotate(-10deg)} }
+  @keyframes hhOrbDrift  { 0%,100%{transform:translate(0,0)} 50%{transform:translate(14px,-16px)} }
+  @keyframes hhShine     { 0%{background-position:-300% center} 100%{background-position:300% center} }
+  @keyframes hhPulseGreen{ 0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4)} 50%{box-shadow:0 0 0 8px transparent} }
+
+  /* ── Welcome Banner ── */
+  .dash-welcome {
+    background: linear-gradient(135deg, var(--hh-footer) 0%, var(--hh-primary-dark) 100%);
+    border-radius: 1.25rem; padding: 2rem 1.75rem;
+    position: relative; overflow: hidden; margin-bottom: 1.5rem;
+  }
+  .dash-welcome .hh-orb {
+    position:absolute; border-radius:50%; filter:blur(55px); opacity:.2; pointer-events:none;
+  }
+  .dash-welcome .hh-orb-1 { width:220px;height:220px;top:-70px;right:-50px;background:var(--hh-primary);animation:hhOrbDrift 8s ease-in-out infinite; }
+  .dash-welcome .hh-orb-2 { width:150px;height:150px;bottom:-50px;left:-30px;background:var(--hh-accent);animation:hhOrbDrift 11s ease-in-out 2s infinite reverse; }
+
+  .dash-welcome-inner { position:relative; z-index:1; }
+  .dash-wave { display:inline-block; animation:hhWaveHello 1.8s ease-in-out 0.8s 2; font-size:1.8rem; }
+  .dash-hello { color:rgba(255,255,255,.75); font-size:.9rem; margin:0 0 .3rem; }
+  .dash-name {
+    font-size:1.6rem; font-weight:800; color:#fff; margin:0 0 .5rem;
+  }
+  .dash-name-shine {
+    background: linear-gradient(90deg,#fff 0%,var(--hh-accent) 40%,#fff 70%,var(--hh-accent) 100%);
+    background-size:300% auto;
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    animation:hhShine 4s linear 1s infinite;
+  }
+  .dash-sub { color:rgba(255,255,255,.65); font-size:.88rem; margin:0 0 1.25rem; }
+
+  .dash-open-badge {
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(34,197,94,.18); border:1px solid rgba(34,197,94,.4);
+    border-radius:999px; padding:4px 14px; font-size:.8rem; font-weight:700; color:#4ade80;
+    animation:hhPulseGreen 2.5s ease infinite;
+  }
+  .dash-open-dot { width:6px;height:6px;border-radius:50%;background:#4ade80; }
+  .dash-not-open { color:rgba(255,255,255,.45); font-size:.82rem; }
+
+  .dash-edit-btn {
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25);
+    color:#fff; border-radius:999px; padding:.45rem 1.1rem;
+    font-size:.84rem; font-weight:600; text-decoration:none;
+    transition:background .22s, transform .18s;
+  }
+  .dash-edit-btn:hover { background:rgba(255,255,255,.22); color:#fff; transform:translateY(-1px); }
+
+  /* ── Stat cards ── */
+  .dash-stat {
+    background:var(--hh-card-bg);
+    border:1px solid var(--hh-card-border);
+    border-radius:1.1rem; padding:1.25rem 1.4rem;
+    display:flex; align-items:center; gap:1rem;
+    box-shadow:0 6px 18px rgba(0,0,0,.06);
+    transition:transform .25s, box-shadow .25s, background .4s !important;
+    animation:hhStatIn .5s cubic-bezier(.22,1,.36,1) both;
+    position:relative; overflow:hidden;
+  }
+  .dash-stat::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background:var(--hh-primary); transform:scaleX(0); transform-origin:left;
+    transition:transform .3s ease;
+  }
+  .dash-stat:hover::before { transform:scaleX(1); }
+  .dash-stat:hover { transform:translateY(-4px); box-shadow:0 14px 30px rgba(0,0,0,.1); }
+
+  .dash-stat:nth-child(1) { animation-delay:.05s; }
+  .dash-stat:nth-child(2) { animation-delay:.13s; }
+  .dash-stat:nth-child(3) { animation-delay:.21s; }
+  .dash-stat:nth-child(4) { animation-delay:.29s; }
+
+  .stat-icon {
+    width:52px; height:52px; border-radius:1rem; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.3rem; transition:transform .25s;
+  }
+  .dash-stat:hover .stat-icon { transform:scale(1.1) rotate(-5deg); }
+
+  .stat-icon-blue   { background:color-mix(in srgb,var(--hh-primary) 14%,var(--hh-bg)); color:var(--hh-primary); }
+  .stat-icon-green  { background:color-mix(in srgb,#22c55e 14%,var(--hh-bg)); color:#16a34a; }
+  .stat-icon-amber  { background:color-mix(in srgb,#f59e0b 14%,var(--hh-bg)); color:#d97706; }
+  .stat-icon-purple { background:color-mix(in srgb,#8b5cf6 14%,var(--hh-bg)); color:#7c3aed; }
+
+  .stat-label { font-size:.78rem; color:var(--hh-muted); font-weight:600; text-transform:uppercase; letter-spacing:.04em; margin:0 0 .2rem; }
+  .stat-value { font-size:1.6rem; font-weight:800; color:var(--hh-primary); margin:0; line-height:1; transition:transform .15s; }
+  .dash-stat:hover .stat-value { transform:scale(1.06); }
+
+  /* ── Section titles ── */
+  .dash-section-title {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:1rem; padding-bottom:.6rem;
+    border-bottom:2px solid var(--hh-card-border);
+  }
+  .dash-section-title h5 { margin:0; font-weight:700; color:var(--hh-ink); display:flex; align-items:center; gap:8px; }
+  .dash-section-title h5 i { color:var(--hh-primary); }
+  .dash-view-all {
+    font-size:.82rem; font-weight:600; color:var(--hh-primary);
+    text-decoration:none; transition:opacity .2s;
+  }
+  .dash-view-all:hover { opacity:.75; text-decoration:underline; }
+
+  /* ── Quick action cards ── */
+  .dash-panel {
+    background:var(--hh-card-bg); border:1px solid var(--hh-card-border);
+    border-radius:1.1rem; padding:1.25rem 1.4rem;
+    height:100%; transition:background .4s;
+  }
+
+  .quick-link {
+    display:flex; align-items:center; gap:12px;
+    padding:.7rem .85rem; border-radius:.85rem;
+    text-decoration:none; color:var(--hh-ink);
+    border:1px solid var(--hh-card-border);
+    background:var(--hh-bg);
+    margin-bottom:.6rem; font-weight:600; font-size:.9rem;
+    transition:background .2s, border-color .2s, transform .2s, color .2s;
+  }
+  .quick-link:last-child { margin-bottom:0; }
+  .quick-link:hover {
+    background:color-mix(in srgb,var(--hh-primary) 9%,var(--hh-bg));
+    border-color:var(--hh-primary); color:var(--hh-primary);
+    transform:translateX(4px);
+  }
+  .quick-link i { font-size:1rem; color:var(--hh-primary); width:20px; flex-shrink:0; }
+
+  .quick-link-arrow {
+    margin-left:auto; font-size:.75rem; opacity:.4;
+    transition:transform .2s, opacity .2s;
+  }
+  .quick-link:hover .quick-link-arrow { opacity:1; transform:translateX(3px); }
+
+  /* ── Recent Applications ── */
+  .app-row {
+    display:flex; align-items:center; gap:12px;
+    padding:.75rem 0; border-bottom:1px solid var(--hh-card-border);
+    transition:background .18s;
+  }
+  .app-row:last-child { border-bottom:none; }
+
+  .app-icon {
+    width:40px; height:40px; border-radius:.75rem; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    background:color-mix(in srgb,var(--hh-primary) 10%,var(--hh-bg));
+    color:var(--hh-primary); font-size:.95rem;
+    transition:background .4s;
+  }
+
+  .app-title { font-weight:700; font-size:.9rem; color:var(--hh-ink); margin:0 0 .1rem; }
+  .app-company { font-size:.78rem; color:var(--hh-muted); margin:0; }
+
+  .app-status {
+    margin-left:auto; flex-shrink:0;
+    border-radius:999px; padding:.22rem .75rem;
+    font-size:.73rem; font-weight:700; white-space:nowrap;
+  }
+  .status-pending    { background:color-mix(in srgb,#f59e0b 14%,var(--hh-bg)); color:#b45309; }
+  .status-shortlisted{ background:color-mix(in srgb,var(--hh-primary) 12%,var(--hh-bg)); color:var(--hh-primary-dark); }
+  .status-selected   { background:color-mix(in srgb,#22c55e 12%,var(--hh-bg)); color:#166534; }
+  .status-rejected   { background:color-mix(in srgb,#ef4444 10%,var(--hh-bg)); color:#b91c1c; }
+
+  /* ── Profile completion bar ── */
+  .completion-wrap {
+    background:var(--hh-card-bg); border:1px solid var(--hh-card-border);
+    border-radius:1.1rem; padding:1.25rem 1.4rem;
+    transition:background .4s;
+  }
+  .completion-bar-bg {
+    height:8px; border-radius:4px; background:var(--hh-card-border);
+    overflow:hidden; margin:.6rem 0;
+  }
+  .completion-bar {
+    height:100%; border-radius:4px; background:var(--hh-primary);
+    transition:width 1s cubic-bezier(.22,1,.36,1) .5s;
+  }
+  .completion-item {
+    display:flex; align-items:center; gap:8px;
+    font-size:.84rem; color:var(--hh-muted); padding:.3rem 0;
+  }
+  .completion-item i { font-size:.85rem; }
+  .ci-done   { color:#22c55e; }
+  .ci-miss   { color:#f59e0b; }
+
+  /* empty state */
+  .dash-empty { text-align:center; padding:2rem 1rem; color:var(--hh-muted); }
+  .dash-empty i { font-size:2rem; opacity:.25; display:block; margin-bottom:.6rem; }
+</style>
+
+<!-- ════════ Welcome Banner ════════ -->
+<div class="dash-welcome hh-reveal">
+  <div class="hh-orb hh-orb-1"></div>
+  <div class="hh-orb hh-orb-2"></div>
+  <div class="dash-welcome-inner d-flex flex-wrap align-items-center justify-content-between gap-3">
+    <div>
+      <p class="dash-hello">Good to see you,</p>
+      <h2 class="dash-name">
+        <span class="dash-wave">👋</span>
+        <span class="dash-name-shine">{{ js.first_name }} {{ js.last_name }}</span>
+      </h2>
+      <p class="dash-sub">Here's a quick overview of your job search activity.</p>
+      {% if js.is_open_to_work %}
+      <div class="dash-open-badge">
+        <span class="dash-open-dot"></span> Open to Work
+      </div>
+      {% else %}
+      <span class="dash-not-open"><i class="ti ti-eye-off me-1"></i>Not visible to employers — turn on Open to Work</span>
+      {% endif %}
+    </div>
+    <div class="d-flex flex-column gap-2 align-items-end">
+      <a href="{% url 'jsprofile' %}" class="dash-edit-btn">
+        <i class="ti ti-user" style="font-size:.9rem;"></i> View Profile
+      </a>
+      <a href="{% url 'jsupdate' %}" class="dash-edit-btn">
+        <i class="ti ti-edit" style="font-size:.9rem;"></i> Edit Profile
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ Stats Row ════════ -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="dash-stat">
+      <div class="stat-icon stat-icon-blue"><i class="ti ti-send"></i></div>
+      <div>
+        <p class="stat-label">Applied</p>
+        <p class="stat-value">{{ applications.count|default:"0" }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="dash-stat">
+      <div class="stat-icon stat-icon-amber"><i class="ti ti-clock"></i></div>
+      <div>
+        <p class="stat-label">Pending</p>
+        <p class="stat-value">{{ pending_count|default:"0" }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="dash-stat">
+      <div class="stat-icon stat-icon-purple"><i class="ti ti-list-check"></i></div>
+      <div>
+        <p class="stat-label">Shortlisted</p>
+        <p class="stat-value">{{ shortlisted_count|default:"0" }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="dash-stat">
+      <div class="stat-icon stat-icon-green"><i class="ti ti-trophy"></i></div>
+      <div>
+        <p class="stat-label">Selected</p>
+        <p class="stat-value">{{ selected_count|default:"0" }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ Main Content ════════ -->
+<div class="row g-3">
+
+  <!-- Recent Applications -->
+  <div class="col-12 col-lg-7 hh-reveal">
+    <div class="dash-panel">
+      <div class="dash-section-title">
+        <h5><i class="ti ti-briefcase"></i>Recent Applications</h5>
+        <a href="{% url 'appliedjobs' %}" class="dash-view-all">View All →</a>
+      </div>
+
+      {% for app in applications|slice:":5" %}
+      <div class="app-row">
+        <div class="app-icon"><i class="ti ti-building"></i></div>
+        <div class="flex-grow-1 min-w-0">
+          <p class="app-title">{{ app.job.title }}</p>
+          <p class="app-company">{{ app.job.company.company_name }} &middot; {{ app.applied_at|date }}</p>
+        </div>
+        <span class="app-status status-{{ app.status }}">{{ app.status|title }}</span>
+      </div>
+      {% empty %}
+      <div class="dash-empty">
+        <i class="ti ti-briefcase-off"></i>
+        No applications yet. <a href="{% url 'index' %}" style="color:var(--hh-primary);font-weight:600;">Browse Jobs →</a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Right Column -->
+  <div class="col-12 col-lg-5">
+    <div class="d-flex flex-column gap-3">
+
+      <!-- Profile Completion -->
+      <div class="completion-wrap hh-reveal hh-d1">
+        <div class="dash-section-title">
+          <h5><i class="ti ti-user-check"></i>Profile Strength</h5>
+        </div>
+        {% with done=0 %}
+        <div class="d-flex align-items-center justify-content-between mb-1">
+          <span style="font-size:.82rem;color:var(--hh-muted);">Completion</span>
+          <span style="font-size:.88rem;font-weight:700;color:var(--hh-primary);" id="profilePct">—</span>
+        </div>
+        <div class="completion-bar-bg">
+          <div class="completion-bar" id="profileBar" style="width:0%;"></div>
+        </div>
+        <div class="mt-2">
+          <div class="completion-item">
+            <i class="ti ti-check {% if js.picture %}ci-done{% else %}ci-miss{% endif %}"></i>
+            <span>Profile Picture {% if not js.picture %}<small style="color:#f59e0b;">(missing)</small>{% endif %}</span>
+          </div>
+          <div class="completion-item">
+            <i class="ti ti-check {% if js.contact_no %}ci-done{% else %}ci-miss{% endif %}"></i>
+            <span>Contact Number {% if not js.contact_no %}<small style="color:#f59e0b;">(missing)</small>{% endif %}</span>
+          </div>
+          <div class="completion-item">
+            <i class="ti ti-check {% if js.resume %}ci-done{% else %}ci-miss{% endif %}"></i>
+            <span>Resume {% if not js.resume %}<small style="color:#f59e0b;">(missing)</small>{% endif %}</span>
+          </div>
+          <div class="completion-item">
+            <i class="ti ti-check {% if js.skills.count %}ci-done{% else %}ci-miss{% endif %}"></i>
+            <span>Skills Added {% if not js.skills.count %}<small style="color:#f59e0b;">(missing)</small>{% endif %}</span>
+          </div>
+          <div class="completion-item">
+            <i class="ti ti-check {% if js.linkedin_url %}ci-done{% else %}ci-miss{% endif %}"></i>
+            <span>LinkedIn URL {% if not js.linkedin_url %}<small style="color:#f59e0b;">(missing)</small>{% endif %}</span>
+          </div>
+        </div>
+        {% endwith %}
+        <a href="{% url 'jsupdate' %}" style="display:flex;align-items:center;justify-content:center;gap:6px;
+          margin-top:1rem;background:var(--hh-primary);color:#fff;border-radius:999px;
+          padding:.5rem 1rem;font-weight:700;font-size:.85rem;text-decoration:none;
+          transition:background .25s,transform .18s;"
+          onmouseover="this.style.background='var(--hh-primary-dark)';this.style.transform='translateY(-1px)'"
+          onmouseout="this.style.background='var(--hh-primary)';this.style.transform='translateY(0)'">
+          <i class="ti ti-edit"></i> Complete Profile
+        </a>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="dash-panel hh-reveal hh-d2">
+        <div class="dash-section-title">
+          <h5><i class="ti ti-bolt"></i>Quick Actions</h5>
+        </div>
+        <a href="{% url 'index' %}" class="quick-link">
+          <i class="ti ti-search"></i> Browse Jobs
+          <i class="ti ti-chevron-right quick-link-arrow"></i>
+        </a>
+        <a href="{% url 'appliedjobs' %}" class="quick-link">
+          <i class="ti ti-briefcase"></i> My Applications
+          <i class="ti ti-chevron-right quick-link-arrow"></i>
+        </a>
+        <a href="{% url 'jsprofile' %}" class="quick-link">
+          <i class="ti ti-user"></i> View Profile
+          <i class="ti ti-chevron-right quick-link-arrow"></i>
+        </a>
+        <a href="{% url 'jsupdate' %}" class="quick-link">
+          <i class="ti ti-edit"></i> Update Profile
+          <i class="ti ti-chevron-right quick-link-arrow"></i>
+        </a>
+        <a href="{% url 'changepassword' %}" class="quick-link">
+          <i class="ti ti-lock"></i> Change Password
+          <i class="ti ti-chevron-right quick-link-arrow"></i>
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* Profile completion bar */
+(function () {
+  var checks = [
+    {{ js.picture|yesno:"1,0" }},
+    {{ js.contact_no|yesno:"1,0" }},
+    {{ js.resume|yesno:"1,0" }},
+    {% if js.skills.count %}1{% else %}0{% endif %},
+    {{ js.linkedin_url|yesno:"1,0" }}
+  ];
+  var score = checks.reduce(function(a,b){ return a+b; }, 0);
+  var pct   = Math.round((score / checks.length) * 100);
+  setTimeout(function () {
+    var bar = document.getElementById('profileBar');
+    var lbl = document.getElementById('profilePct');
+    if (bar) bar.style.width = pct + '%';
+    if (lbl) lbl.textContent = pct + '%';
+  }, 600);
+})();
+</script>
+
+{% endblock %}

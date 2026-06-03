@@ -1,0 +1,142 @@
+{% extends "employer/employerbase.html" %}
+{% load static %}
+
+{% block employer %}
+<style>
+  @keyframes hhStatIn   {from{opacity:0;transform:translateY(22px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+  @keyframes hhWaveHello{0%,100%{transform:rotate(0)}25%{transform:rotate(18deg)}75%{transform:rotate(-10deg)}}
+  @keyframes hhOrbDrift {0%,100%{transform:translate(0,0)}50%{transform:translate(14px,-16px)}}
+  @keyframes hhShine    {0%{background-position:-300% center}100%{background-position:300% center}}
+
+  .dash-welcome{background:linear-gradient(135deg,var(--hh-footer) 0%,var(--hh-primary-dark) 100%);border-radius:1.25rem;padding:2rem 1.75rem;position:relative;overflow:hidden;margin-bottom:1.5rem}
+  .dash-welcome .hh-orb{position:absolute;border-radius:50%;filter:blur(55px);opacity:.2;pointer-events:none}
+  .dash-welcome .hh-orb-1{width:220px;height:220px;top:-70px;right:-50px;background:var(--hh-primary);animation:hhOrbDrift 8s ease-in-out infinite}
+  .dash-welcome .hh-orb-2{width:150px;height:150px;bottom:-50px;left:-30px;background:var(--hh-accent);animation:hhOrbDrift 11s ease-in-out 2s infinite reverse}
+  .dash-welcome-inner{position:relative;z-index:1}
+  .dash-wave{display:inline-block;animation:hhWaveHello 1.8s ease-in-out .8s 2;font-size:1.8rem}
+  .dash-hello{color:rgba(255,255,255,.75);font-size:.9rem;margin:0 0 .3rem}
+  .dash-name{font-size:1.6rem;font-weight:800;color:#fff;margin:0 0 .5rem}
+  .dash-name-shine{background:linear-gradient(90deg,#fff 0%,var(--hh-accent) 40%,#fff 70%,var(--hh-accent) 100%);background-size:300% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:hhShine 4s linear 1s infinite}
+  .dash-sub{color:rgba(255,255,255,.65);font-size:.88rem;margin:0 0 1.25rem}
+  .dash-company-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:4px 14px;font-size:.8rem;font-weight:700;color:#fff}
+  .dash-quick-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:999px;padding:.45rem 1.1rem;font-size:.84rem;font-weight:600;text-decoration:none;transition:background .22s,transform .18s}
+  .dash-quick-btn:hover{background:rgba(255,255,255,.22);color:#fff;transform:translateY(-1px)}
+
+  .dash-stat{background:var(--hh-card-bg);border:1px solid var(--hh-card-border);border-radius:1.1rem;padding:1.25rem 1.4rem;display:flex;align-items:center;gap:1rem;box-shadow:0 6px 18px rgba(0,0,0,.06);transition:transform .25s,box-shadow .25s,background .4s!important;animation:hhStatIn .5s cubic-bezier(.22,1,.36,1) both;position:relative;overflow:hidden}
+  .dash-stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--hh-primary);transform:scaleX(0);transform-origin:left;transition:transform .3s ease}
+  .dash-stat:hover::before{transform:scaleX(1)}
+  .dash-stat:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(0,0,0,.1)}
+  .dash-stat:nth-child(1){animation-delay:.05s}.dash-stat:nth-child(2){animation-delay:.13s}.dash-stat:nth-child(3){animation-delay:.21s}.dash-stat:nth-child(4){animation-delay:.29s}
+  .stat-icon{width:52px;height:52px;border-radius:1rem;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.3rem;transition:transform .25s}
+  .dash-stat:hover .stat-icon{transform:scale(1.1) rotate(-5deg)}
+  .stat-icon-blue{background:color-mix(in srgb,var(--hh-primary) 14%,var(--hh-bg));color:var(--hh-primary)}
+  .stat-icon-green{background:color-mix(in srgb,#22c55e 14%,var(--hh-bg));color:#16a34a}
+  .stat-icon-amber{background:color-mix(in srgb,#f59e0b 14%,var(--hh-bg));color:#d97706}
+  .stat-icon-purple{background:color-mix(in srgb,#8b5cf6 14%,var(--hh-bg));color:#7c3aed}
+  .stat-label{font-size:.78rem;color:var(--hh-muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin:0 0 .2rem}
+  .stat-value{font-size:1.6rem;font-weight:800;color:var(--hh-primary);margin:0;line-height:1;transition:transform .15s}
+  .dash-stat:hover .stat-value{transform:scale(1.06)}
+
+  .dash-panel{background:var(--hh-card-bg);border:1px solid var(--hh-card-border);border-radius:1.1rem;padding:1.25rem 1.4rem;height:100%;transition:background .4s}
+  .dash-section-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding-bottom:.6rem;border-bottom:2px solid var(--hh-card-border)}
+  .dash-section-title h5{margin:0;font-weight:700;color:var(--hh-ink);display:flex;align-items:center;gap:8px}
+  .dash-section-title h5 i{color:var(--hh-primary)}
+  .dash-view-all{font-size:.82rem;font-weight:600;color:var(--hh-primary);text-decoration:none;transition:opacity .2s}
+  .dash-view-all:hover{opacity:.75;text-decoration:underline}
+
+  .job-row{display:flex;align-items:center;gap:12px;padding:.75rem 0;border-bottom:1px solid var(--hh-card-border)}
+  .job-row:last-child{border-bottom:none}
+  .job-icon{width:40px;height:40px;border-radius:.75rem;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--hh-primary) 10%,var(--hh-bg));color:var(--hh-primary);font-size:.95rem}
+  .job-title{font-weight:700;font-size:.9rem;color:var(--hh-ink);margin:0 0 .1rem}
+  .job-meta{font-size:.78rem;color:var(--hh-muted);margin:0}
+  .job-status-active{background:color-mix(in srgb,#22c55e 12%,var(--hh-bg));color:#166534;border-radius:999px;padding:.2rem .65rem;font-size:.73rem;font-weight:700;white-space:nowrap}
+  .job-status-inactive{background:var(--hh-bg);color:var(--hh-muted);border-radius:999px;padding:.2rem .65rem;font-size:.73rem;font-weight:700;white-space:nowrap;border:1px solid var(--hh-card-border)}
+
+  .quick-link{display:flex;align-items:center;gap:12px;padding:.7rem .85rem;border-radius:.85rem;text-decoration:none;color:var(--hh-ink);border:1px solid var(--hh-card-border);background:var(--hh-bg);margin-bottom:.6rem;font-weight:600;font-size:.9rem;transition:background .2s,border-color .2s,transform .2s,color .2s}
+  .quick-link:last-child{margin-bottom:0}
+  .quick-link:hover{background:color-mix(in srgb,var(--hh-primary) 9%,var(--hh-bg));border-color:var(--hh-primary);color:var(--hh-primary);transform:translateX(4px)}
+  .quick-link i{font-size:1rem;color:var(--hh-primary);width:20px;flex-shrink:0}
+  .quick-link-arrow{margin-left:auto;font-size:.75rem;opacity:.4;transition:transform .2s,opacity .2s}
+  .quick-link:hover .quick-link-arrow{opacity:1;transform:translateX(3px)}
+  .dash-empty{text-align:center;padding:2rem 1rem;color:var(--hh-muted)}
+  .dash-empty i{font-size:2rem;opacity:.25;display:block;margin-bottom:.6rem}
+</style>
+
+<!-- Welcome -->
+<div class="dash-welcome hh-reveal">
+  <div class="hh-orb hh-orb-1"></div>
+  <div class="hh-orb hh-orb-2"></div>
+  <div class="dash-welcome-inner d-flex flex-wrap align-items-center justify-content-between gap-3">
+    <div>
+      <p class="dash-hello">Welcome back,</p>
+      <h2 class="dash-name"><span class="dash-wave">👋</span> <span class="dash-name-shine">{{ emp.first_name }} {{ emp.last_name }}</span></h2>
+      <p class="dash-sub">Here's your hiring activity at a glance.</p>
+      {% if emp.company %}
+      <div class="dash-company-badge"><i class="ti ti-building" style="font-size:.85rem;"></i> {{ emp.company.company_name }}</div>
+      {% endif %}
+    </div>
+    <div class="d-flex flex-column gap-2 align-items-end">
+      <a href="{% url 'postjob' %}" class="dash-quick-btn"><i class="ti ti-circle-plus" style="font-size:.9rem;"></i> Post New Job</a>
+      <a href="{% url 'viewjobs' %}" class="dash-quick-btn"><i class="ti ti-briefcase" style="font-size:.9rem;"></i> View All Jobs</a>
+    </div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="dash-stat"><div class="stat-icon stat-icon-blue"><i class="ti ti-briefcase"></i></div><div><p class="stat-label">Jobs Posted</p><p class="stat-value">{{ emp_jobs.count|default:"0" }}</p></div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="dash-stat"><div class="stat-icon stat-icon-green"><i class="ti ti-circle-check"></i></div><div><p class="stat-label">Active Jobs</p><p class="stat-value">{{ active_jobs|default:"0" }}</p></div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="dash-stat"><div class="stat-icon stat-icon-amber"><i class="ti ti-users"></i></div><div><p class="stat-label">Total Applicants</p><p class="stat-value">{{ total_applicants|default:"0" }}</p></div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="dash-stat"><div class="stat-icon stat-icon-purple"><i class="ti ti-trophy"></i></div><div><p class="stat-label">Selected</p><p class="stat-value">{{ total_selected|default:"0" }}</p></div></div>
+  </div>
+</div>
+
+<!-- Content -->
+<div class="row g-3">
+  <!-- Recent Jobs -->
+  <div class="col-12 col-lg-7 hh-reveal">
+    <div class="dash-panel">
+      <div class="dash-section-title">
+        <h5><i class="ti ti-briefcase"></i>Recent Jobs</h5>
+        <a href="{% url 'viewjobs' %}" class="dash-view-all">View All →</a>
+      </div>
+      {% for job in emp_jobs|slice:":5" %}
+      <div class="job-row">
+        <div class="job-icon"><i class="ti ti-file-description"></i></div>
+        <div class="flex-grow-1">
+          <p class="job-title">{{ job.title }}</p>
+          <p class="job-meta">{{ job.get_job_type_display }} &middot; {{ job.location }} &middot; {% if job.salary %}₹{{ job.salary }}{% else %}Not Disclosed{% endif %}</p>
+        </div>
+        <div class="d-flex flex-column align-items-end gap-1">
+          {% if job.is_active %}<span class="job-status-active">Active</span>{% else %}<span class="job-status-inactive">Inactive</span>{% endif %}
+          <a href="{% url 'viewapplicants' jobid=job.id %}" style="font-size:.75rem;color:var(--hh-primary);font-weight:600;text-decoration:none;">Applicants →</a>
+        </div>
+      </div>
+      {% empty %}
+      <div class="dash-empty"><i class="ti ti-briefcase-off"></i>No jobs posted yet. <a href="{% url 'postjob' %}" style="color:var(--hh-primary);font-weight:600;">Post a Job →</a></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="col-12 col-lg-5 hh-reveal hh-d1">
+    <div class="dash-panel">
+      <div class="dash-section-title">
+        <h5><i class="ti ti-bolt"></i>Quick Actions</h5>
+      </div>
+      <a href="{% url 'postjob' %}" class="quick-link"><i class="ti ti-circle-plus"></i>Post New Job<i class="ti ti-chevron-right quick-link-arrow"></i></a>
+      <a href="{% url 'viewjobs' %}" class="quick-link"><i class="ti ti-briefcase"></i>View My Jobs<i class="ti ti-chevron-right quick-link-arrow"></i></a>
+      <a href="{% url 'empprofile' %}" class="quick-link"><i class="ti ti-user"></i>View Profile<i class="ti ti-chevron-right quick-link-arrow"></i></a>
+      <a href="{% url 'empupdate' %}" class="quick-link"><i class="ti ti-edit"></i>Update Profile<i class="ti ti-chevron-right quick-link-arrow"></i></a>
+      <a href="{% url 'changepassword' %}" class="quick-link"><i class="ti ti-lock"></i>Change Password<i class="ti ti-chevron-right quick-link-arrow"></i></a>
+    </div>
+  </div>
+</div>
+{% endblock %}

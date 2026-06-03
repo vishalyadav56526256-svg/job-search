@@ -1,0 +1,102 @@
+{% extends "admin/adminbase.html" %}
+{% load static %}
+
+{% block admin %}
+<style>
+  @keyframes hhRowIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+
+  .enq-header{background:linear-gradient(135deg,color-mix(in srgb,var(--hh-primary) 10%,var(--hh-card-bg)) 0%,var(--hh-card-bg) 65%);border:1px solid var(--hh-card-border);border-radius:1.1rem;padding:1.25rem 1.5rem;margin-bottom:1.1rem;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+  .enq-header::before{content:'';position:absolute;width:140px;height:140px;border-radius:50%;background:color-mix(in srgb,var(--hh-primary) 8%,transparent);top:-50px;right:-40px;pointer-events:none}
+  .enq-header-text{position:relative;z-index:1}
+  .enq-header h4{color:var(--hh-ink);font-weight:700;margin:0 0 .2rem}
+  .enq-header p{color:var(--hh-muted);margin:0;font-size:.88rem}
+  .enq-count-badge{position:relative;z-index:1;background:color-mix(in srgb,var(--hh-primary) 12%,var(--hh-bg));border:1px solid color-mix(in srgb,var(--hh-primary) 22%,transparent);color:var(--hh-primary-dark);border-radius:999px;padding:.4rem 1rem;font-size:.88rem;font-weight:700;display:flex;align-items:center;gap:6px;transition:background .4s}
+
+  .enq-table-card{background:var(--hh-card-bg);border:1px solid var(--hh-card-border);border-radius:1.25rem;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.05)}
+
+  .enq-table{width:100%;border-collapse:separate;border-spacing:0}
+  .enq-table thead tr{background:color-mix(in srgb,var(--hh-primary) 7%,var(--hh-bg))}
+  .enq-table thead th{color:var(--hh-muted);font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:.85rem 1rem;border-bottom:1px solid var(--hh-card-border);white-space:nowrap}
+  .enq-table tbody tr{transition:background .18s;animation:hhRowIn .4s ease both}
+  .enq-table tbody tr:nth-child(1){animation-delay:.05s}.enq-table tbody tr:nth-child(2){animation-delay:.10s}.enq-table tbody tr:nth-child(3){animation-delay:.15s}.enq-table tbody tr:nth-child(4){animation-delay:.20s}.enq-table tbody tr:nth-child(5){animation-delay:.25s}
+  .enq-table tbody tr:hover{background:color-mix(in srgb,var(--hh-primary) 5%,var(--hh-bg))}
+  .enq-table td{padding:.85rem 1rem;color:var(--hh-ink);border-bottom:1px solid var(--hh-card-border);font-size:.88rem;vertical-align:middle}
+  .enq-table tbody tr:last-child td{border-bottom:none}
+
+  .enq-sender{font-weight:700;color:var(--hh-ink);margin:0 0 .1rem}
+  .enq-email{font-size:.76rem;color:var(--hh-muted);margin:0}
+
+  .enq-subject{display:inline-flex;align-items:center;gap:5px;background:color-mix(in srgb,var(--hh-primary) 10%,var(--hh-bg));border:1px solid color-mix(in srgb,var(--hh-primary) 20%,transparent);color:var(--hh-primary-dark);border-radius:999px;padding:.2rem .7rem;font-size:.75rem;font-weight:700;transition:background .4s}
+
+  .enq-msg{max-width:200px;color:var(--hh-muted);font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  .enq-date{color:var(--hh-muted);font-size:.8rem;white-space:nowrap}
+
+  .del-btn{width:34px;height:34px;border-radius:.65rem;border:1px solid color-mix(in srgb,#ef4444 25%,var(--hh-card-border));background:color-mix(in srgb,#ef4444 6%,var(--hh-bg));color:#dc2626;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;font-size:.9rem;cursor:pointer;transition:all .2s}
+  .del-btn:hover{background:#ef4444;border-color:#ef4444;color:#fff;transform:translateY(-1px);box-shadow:0 4px 12px rgba(239,68,68,.25)}
+
+  .enq-empty{text-align:center;padding:3rem 1rem;color:var(--hh-muted)}
+  .enq-empty i{font-size:2.5rem;opacity:.25;display:block;margin-bottom:.75rem}
+
+  /* Expandable message tooltip on hover */
+  .enq-msg-cell{position:relative;cursor:pointer}
+  .enq-msg-full{display:none;position:absolute;left:0;top:100%;z-index:10;background:var(--hh-card-bg);border:1px solid var(--hh-card-border);border-radius:.85rem;padding:.75rem 1rem;font-size:.85rem;color:var(--hh-ink);max-width:280px;box-shadow:0 8px 24px rgba(0,0,0,.1);line-height:1.5;min-width:180px}
+  .enq-msg-cell:hover .enq-msg-full{display:block}
+</style>
+
+<div class="enq-header hh-reveal">
+  <div class="enq-header-text">
+    <h4><i class="ti ti-message-dots me-2" style="color:var(--hh-primary);"></i>Enquiries</h4>
+    <p>All contact form submissions from the website.</p>
+  </div>
+  <div class="enq-count-badge"><i class="ti ti-inbox" style="font-size:.85rem;"></i>{{ enqs|length }} Total</div>
+</div>
+
+<div class="enq-table-card hh-reveal hh-d1">
+  {% if enqs %}
+  <div style="overflow-x:auto;">
+    <table class="enq-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Sender</th>
+          <th>Contact</th>
+          <th>Subject</th>
+          <th>Message</th>
+          <th>Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in enqs %}
+        <tr>
+          <td style="color:var(--hh-muted);font-weight:600;">{{ forloop.counter }}</td>
+          <td>
+            <p class="enq-sender">{{ e.name }}</p>
+            <p class="enq-email">{{ e.email }}</p>
+          </td>
+          <td style="color:var(--hh-muted);">{{ e.contactno|default:"—" }}</td>
+          <td><span class="enq-subject"><i class="ti ti-tag" style="font-size:.7rem;"></i>{{ e.subject }}</span></td>
+          <td class="enq-msg-cell">
+            <p class="enq-msg">{{ e.message }}</p>
+            <div class="enq-msg-full">{{ e.message }}</div>
+          </td>
+          <td class="enq-date">{{ e.created_at|date:"d M Y" }}<br><small style="font-size:.72rem;">{{ e.created_at|time:"h:i A" }}</small></td>
+          <td>
+            <a href="" class="del-btn" title="Delete" onclick="return confirm('Delete this enquiry?');">
+              <i class="ti ti-trash"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="enq-empty">
+    <i class="ti ti-inbox-off"></i>
+    No enquiries received yet.
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends "employer/employerbase.html" %}
+{% load static %}
+
+{% block employer %}
+<style>
+  @keyframes hhAvatarIn{0%{transform:scale(.7) rotate(-8deg);opacity:0}70%{transform:scale(1.05) rotate(2deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+  @keyframes hhOrbDrift{0%,100%{transform:translate(0,0)}50%{transform:translate(14px,-16px)}}
+
+  .ep-shell{border:1px solid var(--hh-card-border);border-radius:1.5rem;background:var(--hh-card-bg);padding:1rem;transition:background .4s}
+  .ep-card{border:1px solid var(--hh-card-border)!important;border-radius:1.1rem!important;background:var(--hh-card-bg)!important;box-shadow:0 8px 24px rgba(0,0,0,.06);transition:background .4s,border-color .3s!important}
+
+  .ep-profile-card{background:linear-gradient(135deg,color-mix(in srgb,var(--hh-primary) 10%,var(--hh-card-bg)) 0%,var(--hh-card-bg) 65%)!important;overflow:hidden;position:relative}
+  .ep-profile-card::before{content:'';position:absolute;width:170px;height:170px;border-radius:50%;background:color-mix(in srgb,var(--hh-primary) 8%,transparent);right:-40px;top:-40px;animation:hhOrbDrift 8s ease-in-out infinite;pointer-events:none}
+
+  .ep-avatar{width:120px;height:120px;object-fit:cover;border-radius:50%;border:3px solid var(--hh-primary);box-shadow:0 10px 24px rgba(0,0,0,.12);animation:hhAvatarIn .6s cubic-bezier(.34,1.56,.64,1) .3s both;transition:transform .25s}
+  .ep-avatar:hover{transform:scale(1.04)}
+  .ep-name{font-weight:800;color:var(--hh-ink);margin-bottom:.1rem}
+  .ep-desig{color:var(--hh-muted);font-size:.9rem;margin:0 0 .75rem}
+  .ep-badge{display:inline-flex;align-items:center;border-radius:999px;font-size:.8rem;padding:.3rem .8rem;border:1px solid var(--hh-card-border);background:color-mix(in srgb,var(--hh-primary) 8%,var(--hh-bg));color:var(--hh-primary-dark);font-weight:600;transition:background .4s}
+
+  .ep-section-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem;padding-bottom:.55rem;border-bottom:2px solid var(--hh-card-border)}
+  .ep-section-title span{font-size:1rem;font-weight:700;color:var(--hh-ink);display:flex;align-items:center;gap:8px}
+  .ep-section-title span i{color:var(--hh-primary)}
+
+  .ep-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem}
+  @media(max-width:991.98px){.ep-grid{grid-template-columns:1fr}}
+  .ep-item{border:1px solid var(--hh-card-border);border-radius:.85rem;background:var(--hh-bg);padding:.75rem .9rem;transition:background .4s,transform .2s}
+  .ep-item:hover{transform:translateY(-2px);border-color:var(--hh-primary)}
+  .ep-item.full{grid-column:1/-1}
+  .ep-label{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.04em;color:var(--hh-muted);margin-bottom:.2rem;font-weight:700}
+  .ep-value{color:var(--hh-ink);font-weight:600;word-break:break-word;font-size:.9rem}
+  .ep-value a{color:var(--hh-primary);text-decoration:none}.ep-value a:hover{text-decoration:underline}
+
+  .ep-company-logo{width:80px;height:80px;object-fit:cover;border-radius:1rem;border:1px solid var(--hh-card-border);background:var(--hh-bg);padding:.3rem;transition:transform .25s}
+  .ep-company-logo:hover{transform:scale(1.05)}
+  .ep-no-logo{width:80px;height:80px;border-radius:1rem;border:1px dashed var(--hh-card-border);background:var(--hh-bg);display:flex;align-items:center;justify-content:center;color:var(--hh-muted);font-size:.75rem;font-weight:600}
+
+  .ep-empty{border:1px dashed var(--hh-card-border);border-radius:.85rem;background:var(--hh-bg);color:var(--hh-muted);padding:.9rem;text-align:center;font-size:.88rem;transition:background .4s}
+  .ep-empty a{color:var(--hh-primary);font-weight:600}
+
+  .ep-edit-btn{display:inline-flex;align-items:center;gap:6px;background:var(--hh-primary);color:#fff;border:none;border-radius:999px;padding:.4rem 1rem;font-size:.82rem;font-weight:700;text-decoration:none;transition:background .25s,transform .18s}
+  .ep-edit-btn:hover{background:var(--hh-primary-dark);color:#fff;transform:translateY(-1px)}
+  .ep-outline-btn{background:transparent;color:var(--hh-primary);border:1.5px solid var(--hh-primary);border-radius:999px;padding:.4rem 1rem;font-size:.82rem;font-weight:700;text-decoration:none;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+  .ep-outline-btn:hover{background:var(--hh-primary);color:#fff;transform:translateY(-1px)}
+</style>
+
+<div class="row">
+  <div class="col-12">
+    <div class="ep-shell hh-reveal">
+      <div class="row g-3">
+
+        <!-- Profile Card -->
+        <div class="col-xl-4">
+          <div class="ep-card ep-profile-card p-4 text-center h-100">
+            {% if emp.picture %}<img src="{{ emp.picture.url }}" alt="Photo" class="ep-avatar mx-auto mb-3">
+            {% else %}<img src="{% static 'admin/assets/images/user/avatar-2.jpg' %}" alt="Photo" class="ep-avatar mx-auto mb-3">{% endif %}
+            <h4 class="ep-name">{{ emp.first_name }} {{ emp.last_name }}</h4>
+            <p class="ep-desig">{{ emp.designation|default:"Employer" }}</p>
+            <span class="ep-badge"><i class="ti ti-id-badge" style="font-size:.8rem;"></i> {{ empid }}</span>
+          </div>
+        </div>
+
+        <!-- Personal Details -->
+        <div class="col-xl-8 hh-reveal hh-d1">
+          <div class="ep-card p-4 h-100">
+            <div class="ep-section-title">
+              <span><i class="ti ti-user"></i>Personal Details</span>
+              <a href="{% url 'empupdate' %}" class="ep-edit-btn"><i class="ti ti-edit" style="font-size:.85rem;"></i>Edit</a>
+            </div>
+            <div class="ep-grid">
+              <div class="ep-item"><span class="ep-label">First Name</span><span class="ep-value">{{ emp.first_name }}</span></div>
+              <div class="ep-item"><span class="ep-label">Last Name</span><span class="ep-value">{{ emp.last_name }}</span></div>
+              <div class="ep-item"><span class="ep-label">Email</span><span class="ep-value">{{ emp.email }}</span></div>
+              <div class="ep-item"><span class="ep-label">Contact</span><span class="ep-value">{{ emp.contact_no|default:"—" }}</span></div>
+              <div class="ep-item"><span class="ep-label">Date of Birth</span><span class="ep-value">{{ emp.dob|default:"—" }}</span></div>
+              <div class="ep-item"><span class="ep-label">Gender</span><span class="ep-value">{{ emp.get_gender_display|default:"—" }}</span></div>
+              <div class="ep-item full"><span class="ep-label">Designation</span><span class="ep-value">{{ emp.designation|default:"—" }}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Company Details -->
+      <div class="row g-3 mt-1">
+        <div class="col-12 hh-reveal">
+          <div class="ep-card p-4">
+            <div class="ep-section-title">
+              <span><i class="ti ti-building"></i>Company Details</span>
+              <a href="{% url 'empupdate' %}" class="ep-outline-btn"><i class="ti ti-settings" style="font-size:.85rem;"></i>Manage</a>
+            </div>
+            {% if emp.company %}
+            <div class="d-flex align-items-center gap-3 mb-3">
+              {% if emp.company.logo %}<img src="{{ emp.company.logo.url }}" alt="Logo" class="ep-company-logo">
+              {% else %}<div class="ep-no-logo"><i class="ti ti-building" style="font-size:1.5rem;opacity:.35;"></i></div>{% endif %}
+              <div>
+                <h5 style="color:var(--hh-ink);font-weight:800;margin:0 0 .2rem;">{{ emp.company.company_name }}</h5>
+                <p style="color:var(--hh-muted);margin:0;font-size:.88rem;">{{ emp.company.industry }}</p>
+              </div>
+            </div>
+            <div class="ep-grid">
+              <div class="ep-item"><span class="ep-label">Email</span><span class="ep-value">{{ emp.company.email }}</span></div>
+              <div class="ep-item"><span class="ep-label">Contact</span><span class="ep-value">{{ emp.company.contact_no }}</span></div>
+              <div class="ep-item"><span class="ep-label">Established</span><span class="ep-value">{{ emp.company.established_at|default:"—" }}</span></div>
+              <div class="ep-item"><span class="ep-label">Website</span><span class="ep-value">{% if emp.company.website %}<a href="{% if '://' in emp.company.website %}{{ emp.company.website }}{% else %}https://{{ emp.company.website }}{% endif %}" target="_blank">{{ emp.company.website }}</a>{% else %}—{% endif %}</span></div>
+              <div class="ep-item full"><span class="ep-label">Location</span><span class="ep-value">{{ emp.company.location }}</span></div>
+              <div class="ep-item full"><span class="ep-label">Description</span><span class="ep-value">{{ emp.company.details|default:"—" }}</span></div>
+            </div>
+            {% else %}
+            <div class="ep-empty">Company details not added yet. <a href="{% url 'empupdate' %}">Add now →</a></div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

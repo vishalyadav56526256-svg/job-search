@@ -1,0 +1,100 @@
+{% extends "employer/employerbase.html" %}
+{% load static %}
+
+{% block employer %}
+<style>
+  @keyframes hhRowIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+
+  .vj-header{background:linear-gradient(135deg,color-mix(in srgb,var(--hh-primary) 10%,var(--hh-card-bg)) 0%,var(--hh-card-bg) 65%);border:1px solid var(--hh-card-border);border-radius:1.1rem;padding:1.25rem 1.5rem;margin-bottom:1.1rem;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+  .vj-header::before{content:'';position:absolute;width:140px;height:140px;border-radius:50%;background:color-mix(in srgb,var(--hh-primary) 8%,transparent);top:-50px;right:-40px;pointer-events:none}
+  .vj-header h4{color:var(--hh-ink);font-weight:700;margin:0 0 .2rem;position:relative;z-index:1}
+  .vj-header p{color:var(--hh-muted);margin:0;font-size:.88rem;position:relative;z-index:1}
+  .vj-post-btn{display:inline-flex;align-items:center;gap:6px;background:var(--hh-primary);color:#fff;border:none;border-radius:999px;padding:.5rem 1.2rem;font-weight:700;font-size:.85rem;text-decoration:none;transition:background .25s,transform .18s;position:relative;z-index:1}
+  .vj-post-btn:hover{background:var(--hh-primary-dark);color:#fff;transform:translateY(-1px)}
+
+  .vj-table-card{background:var(--hh-card-bg);border:1px solid var(--hh-card-border);border-radius:1.25rem;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.05)}
+  .vj-table{width:100%;border-collapse:separate;border-spacing:0}
+  .vj-table thead tr{background:color-mix(in srgb,var(--hh-primary) 7%,var(--hh-bg))}
+  .vj-table thead th{color:var(--hh-muted);font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:.85rem 1rem;border-bottom:1px solid var(--hh-card-border);white-space:nowrap}
+  .vj-table tbody tr{transition:background .18s;animation:hhRowIn .4s ease both}
+  .vj-table tbody tr:nth-child(1){animation-delay:.05s}.vj-table tbody tr:nth-child(2){animation-delay:.10s}.vj-table tbody tr:nth-child(3){animation-delay:.15s}.vj-table tbody tr:nth-child(4){animation-delay:.20s}.vj-table tbody tr:nth-child(5){animation-delay:.25s}
+  .vj-table tbody tr:hover{background:color-mix(in srgb,var(--hh-primary) 5%,var(--hh-bg))}
+  .vj-table td{padding:.85rem 1rem;color:var(--hh-ink);border-bottom:1px solid var(--hh-card-border);font-size:.88rem;vertical-align:middle}
+  .vj-table tbody tr:last-child td{border-bottom:none}
+
+  .vj-title{font-weight:700;color:var(--hh-ink)}
+  .vj-date{font-size:.75rem;color:var(--hh-muted)}
+  .badge-type{background:color-mix(in srgb,var(--hh-primary) 12%,var(--hh-bg));color:var(--hh-primary-dark);border-radius:999px;padding:.22rem .75rem;font-size:.75rem;font-weight:700}
+  .badge-active{background:color-mix(in srgb,#22c55e 12%,var(--hh-bg));color:#166534;border-radius:999px;padding:.22rem .75rem;font-size:.75rem;font-weight:700}
+  .badge-inactive{background:var(--hh-bg);color:var(--hh-muted);border-radius:999px;padding:.22rem .75rem;font-size:.75rem;font-weight:700;border:1px solid var(--hh-card-border)}
+
+  .act-btn{width:34px;height:34px;border-radius:.6rem;border:1px solid var(--hh-card-border);background:var(--hh-bg);color:var(--hh-muted);display:inline-flex;align-items:center;justify-content:center;text-decoration:none;transition:all .2s;font-size:.9rem}
+  .act-btn:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,.08)}
+  .act-btn-edit:hover{border-color:var(--hh-primary);color:var(--hh-primary);background:color-mix(in srgb,var(--hh-primary) 8%,var(--hh-bg))}
+  .act-btn-del:hover{border-color:#ef4444;color:#ef4444;background:color-mix(in srgb,#ef4444 8%,var(--hh-bg))}
+  .act-btn-view:hover{border-color:#22c55e;color:#16a34a;background:color-mix(in srgb,#22c55e 8%,var(--hh-bg))}
+
+  .vj-empty{text-align:center;padding:3rem 1rem;color:var(--hh-muted)}
+  .vj-empty i{font-size:2.5rem;opacity:.25;display:block;margin-bottom:.75rem}
+</style>
+
+<div class="vj-header hh-reveal">
+  <div>
+    <h4><i class="ti ti-briefcase me-2" style="color:var(--hh-primary);"></i>Posted Jobs</h4>
+    <p>Manage and track all your job listings here.</p>
+  </div>
+  <a href="{% url 'postjob' %}" class="vj-post-btn"><i class="ti ti-circle-plus"></i>Post New Job</a>
+</div>
+
+<div class="vj-table-card hh-reveal hh-d1">
+  {% if emp_jobs %}
+  <div style="overflow-x:auto;">
+    <table class="vj-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Title</th>
+          <th>Type</th>
+          <th>Salary</th>
+          <th>Location</th>
+          <th>Vacancy</th>
+          <th>Deadline</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for job in emp_jobs %}
+        <tr>
+          <td style="color:var(--hh-muted);font-weight:600;">{{ forloop.counter }}</td>
+          <td>
+            <div class="vj-title">{{ job.title }}</div>
+            <div class="vj-date">{{ job.created_at|date:"d M Y" }}</div>
+          </td>
+          <td><span class="badge-type">{{ job.get_job_type_display }}</span></td>
+          <td style="font-weight:600;">{% if job.salary %}₹{{ job.salary }}{% else %}<span style="color:var(--hh-muted);">—</span>{% endif %}</td>
+          <td>{{ job.location }}</td>
+          <td style="font-weight:600;text-align:center;">{{ job.vacancy }}</td>
+          <td style="color:var(--hh-muted);">{% if job.deadline %}{{ job.deadline }}{% else %}—{% endif %}</td>
+          <td>{% if job.is_active %}<span class="badge-active">Active</span>{% else %}<span class="badge-inactive">Inactive</span>{% endif %}</td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="" class="act-btn act-btn-edit" title="Edit"><i class="ti ti-pencil"></i></a>
+              <a href="" class="act-btn act-btn-del" title="Delete" onclick="return confirm('Are you sure?');"><i class="ti ti-trash"></i></a>
+              <a href="{% url 'viewapplicants' jobid=job.id %}" class="act-btn act-btn-view" title="View Applicants"><i class="ti ti-users"></i></a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="vj-empty">
+    <i class="ti ti-briefcase-off"></i>
+    No jobs posted yet.
+    <br><a href="{% url 'postjob' %}" style="color:var(--hh-primary);font-weight:600;text-decoration:none;">Post your first job →</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

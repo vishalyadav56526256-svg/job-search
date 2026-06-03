@@ -1,0 +1,509 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+
+{% block maintitle %}HireHub - Find Best Jobs{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* ═══════════════════════════════════════
+       EXTRA KEYFRAMES (index only)
+    ═══════════════════════════════════════ */
+    @keyframes hhHeroText  { from{opacity:0;transform:translateX(-30px)} to{opacity:1;transform:translateX(0)} }
+    @keyframes hhHeroPanel { from{opacity:0;transform:translateX(30px) scale(.96)} to{opacity:1;transform:translateX(0) scale(1)} }
+    @keyframes hhFloat     { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+    @keyframes hhOrbDrift  { 0%{transform:translate(0,0) scale(1)} 50%{transform:translate(18px,-22px) scale(1.08)} 100%{transform:translate(0,0) scale(1)} }
+    @keyframes hhTagSlide  { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes hhShine     { 0%{background-position:-300% center} 100%{background-position:300% center} }
+
+    /* ── Hero ── */
+    .home-hero {
+        background: radial-gradient(circle at top right, var(--hh-bg-radial-a) 0%, var(--hh-bg) 50%, var(--hh-bg-radial-b) 100%);
+        color: var(--hh-ink); position: relative; overflow: hidden;
+    }
+
+    /* Floating background orbs */
+    .hh-orb {
+        position: absolute; border-radius: 50%; filter: blur(60px);
+        opacity: .18; pointer-events: none;
+        background: var(--hh-primary);
+    }
+    .hh-orb-1 { width:280px; height:280px; top:-60px; left:-80px; animation:hhOrbDrift 8s ease-in-out infinite; }
+    .hh-orb-2 { width:200px; height:200px; bottom:20px; right:-50px; animation:hhOrbDrift 11s ease-in-out 2s infinite reverse; background:var(--hh-accent); }
+
+    .hero-tag {
+        display:inline-flex; align-items:center; gap:6px;
+        background:color-mix(in srgb,var(--hh-primary) 12%,var(--hh-card-bg));
+        border:1px solid var(--hh-card-border); border-radius:999px;
+        padding:4px 14px; font-size:.82rem; font-weight:600;
+        color:var(--hh-primary); margin-bottom:1rem;
+        animation:hhTagSlide .5s ease .2s both;
+    }
+    .hero-tag .dot { width:7px; height:7px; border-radius:50%; background:var(--hh-accent); animation:hhDotBounce 2s ease-in-out infinite; }
+
+    .hero-headline {
+        color:var(--hh-ink);
+        animation:hhHeroText .7s cubic-bezier(.22,1,.36,1) .3s both;
+    }
+    .hero-sub {
+        color:var(--hh-navlink-color);
+        animation:hhHeroText .7s cubic-bezier(.22,1,.36,1) .45s both;
+    }
+    .hero-btns { animation:hhHeroText .6s cubic-bezier(.22,1,.36,1) .6s both; }
+
+    /* Shine text on headline accent */
+    .hero-shine {
+        background: linear-gradient(90deg, var(--hh-primary) 0%, var(--hh-accent) 30%, var(--hh-primary) 60%, var(--hh-accent) 100%);
+        background-size: 300% auto;
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: hhShine 4s linear 1.5s infinite;
+    }
+
+    .hero-panel {
+        background:var(--hh-card-bg,#fff);
+        border:1px solid var(--hh-card-border,rgba(0,0,0,.08));
+        border-radius:1.25rem;
+        box-shadow:0 20px 48px rgba(0,0,0,.12);
+        backdrop-filter:blur(6px);
+        animation:hhHeroPanel .75s cubic-bezier(.22,1,.36,1) .4s both;
+    }
+    .hero-panel .form-label, .hero-panel h5 { color:var(--hh-ink) !important; }
+    .hero-panel .form-control {
+        background:var(--hh-bg); border-color:var(--hh-card-border); color:var(--hh-ink);
+        transition:border-color .25s, box-shadow .25s !important;
+    }
+    .hero-panel .form-control::placeholder { color:var(--hh-navlink-color); opacity:.7; }
+    .hero-panel .form-control:focus {
+        border-color:var(--hh-primary);
+        box-shadow:0 0 0 3px color-mix(in srgb,var(--hh-primary) 18%,transparent);
+        background:var(--hh-bg); color:var(--hh-ink);
+    }
+
+    .hero-search-btn {
+        background:var(--hh-primary) !important; border-color:var(--hh-primary) !important;
+        color:#fff !important; border-radius:999px !important; font-weight:700;
+        padding:.6rem 1.4rem;
+        transition:background .3s, transform .2s, box-shadow .2s !important;
+    }
+    .hero-search-btn:hover { background:var(--hh-primary-dark) !important; transform:translateY(-2px); box-shadow:0 6px 20px color-mix(in srgb,var(--hh-primary) 35%,transparent) !important; }
+
+    .hero-cta-primary {
+        background:var(--hh-primary) !important; border-color:var(--hh-primary) !important;
+        color:#fff !important; border-radius:999px !important; font-weight:700; padding:.65rem 1.6rem;
+        transition:background .3s, transform .2s, box-shadow .2s !important;
+    }
+    .hero-cta-primary:hover { background:var(--hh-primary-dark) !important; transform:translateY(-2px); box-shadow:0 8px 22px color-mix(in srgb,var(--hh-primary) 35%,transparent) !important; }
+
+    .hero-cta-outline {
+        border:2px solid var(--hh-primary) !important; color:var(--hh-primary) !important;
+        background:transparent !important; border-radius:999px !important; font-weight:700; padding:.65rem 1.6rem;
+        transition:all .3s !important;
+    }
+    .hero-cta-outline:hover { background:var(--hh-primary) !important; color:#fff !important; transform:translateY(-2px); }
+
+    /* ── Sections ── */
+    .section-bg { background:var(--hh-bg); transition:background .4s; }
+
+    /* ── Why Panel ── */
+    .why-panel {
+        background:linear-gradient(145deg, var(--hh-footer) 0%, var(--hh-footer-grad) 100%);
+        color:#f1f5f9; border-radius:1.25rem;
+        box-shadow:0 18px 40px rgba(0,0,0,.18);
+    }
+    .why-panel h2, .why-panel h5 { color:#fff; }
+    .why-panel .text-light-emphasis { color:rgba(241,245,249,.7) !important; }
+    .why-item {
+        border-left:3px solid var(--hh-accent); padding-left:1rem;
+        transition:border-color .3s, transform .25s;
+    }
+    .why-item:hover { transform:translateX(4px); }
+    .why-item i { transition:transform .3s; }
+    .why-item:hover i { transform:scale(1.2) rotate(-5deg); }
+
+    /* ── Stat cards ── */
+    .stats-surface {
+        border-radius:1.25rem; background:var(--hh-card-bg,#fff);
+        border:1px solid var(--hh-card-border,#e2e8f0);
+    }
+    .stats-surface h4 { color:var(--hh-ink); }
+    .stat-card {
+        border:1px solid var(--hh-card-border,#e2e8f0) !important; border-radius:1rem;
+        background:var(--hh-bg) !important; box-shadow:0 6px 18px rgba(0,0,0,.05);
+        transition:transform .25s, box-shadow .25s, background .4s !important;
+    }
+    .stat-card:hover { transform:translateY(-5px); box-shadow:0 14px 30px rgba(0,0,0,.1); }
+    .stat-card h4 { color:var(--hh-primary); font-size:1.6rem; }
+    .stat-card p  { color:var(--hh-navlink-color); font-size:.85rem; }
+
+    /* counter number pop */
+    .stat-card h4 { transition:transform .15s; }
+    .stat-card:hover h4 { transform:scale(1.1); }
+
+    /* ── Categories ── */
+    .categories-wrap {
+        background:var(--hh-card-bg,#fff); border:1px solid var(--hh-card-border,#e2e8f0);
+        border-radius:1.25rem; padding:1.5rem; transition:background .4s;
+    }
+    .categories-wrap h4 { color:var(--hh-ink); }
+    .category-badge {
+        display:inline-flex; align-items:center; justify-content:space-between; gap:10px;
+        background:var(--hh-bg); border:1px solid var(--hh-card-border,#e2e8f0);
+        border-radius:999px; padding:.45rem 1rem; margin:.3rem; cursor:pointer;
+        transition:background .2s, border-color .2s, transform .2s, box-shadow .2s;
+    }
+    .category-badge:hover {
+        background:color-mix(in srgb,var(--hh-primary) 10%,var(--hh-bg));
+        border-color:var(--hh-primary); transform:translateY(-2px);
+        box-shadow:0 6px 16px color-mix(in srgb,var(--hh-primary) 18%,transparent);
+    }
+    .category-badge span:first-child { font-weight:600; font-size:.88rem; color:var(--hh-ink); }
+    .category-count {
+        font-size:.78rem; color:var(--hh-navlink-color);
+        background:var(--hh-card-border,#e2e8f0); padding:1px 8px; border-radius:999px;
+    }
+    .explore-btn {
+        border:1.5px solid var(--hh-primary) !important; color:var(--hh-primary) !important;
+        border-radius:999px !important; font-weight:600; font-size:.85rem;
+        background:transparent !important; transition:all .22s !important;
+    }
+    .explore-btn:hover { background:var(--hh-primary) !important; color:#fff !important; transform:translateY(-1px); }
+
+    /* ── Job Cards ── */
+    .job-card {
+        border:1px solid var(--hh-card-border,#e2e8f0) !important; border-radius:1rem;
+        background:var(--hh-card-bg,#fff) !important; box-shadow:0 8px 20px rgba(0,0,0,.06);
+        transition:transform .25s, box-shadow .25s, background .4s !important;
+    }
+    .job-card:hover {
+        transform:translateY(-5px);
+        box-shadow:0 18px 36px rgba(0,0,0,.11);
+        border-color:var(--hh-primary) !important;
+    }
+    .job-card h5, .job-card .company-name { color:var(--hh-ink) !important; }
+    .job-card .text-secondary { color:var(--hh-navlink-color) !important; }
+    .job-badge {
+        background:color-mix(in srgb,var(--hh-primary) 15%,var(--hh-bg)) !important;
+        color:var(--hh-primary-dark) !important; border-radius:999px;
+        padding:.28rem .75rem; font-size:.8rem; font-weight:600; border:none;
+    }
+    .chip {
+        display:inline-block; border-radius:999px; padding:.2rem .7rem; font-size:.78rem;
+        background:color-mix(in srgb,var(--hh-accent) 15%,var(--hh-bg));
+        color:var(--hh-primary-dark);
+        border:1px solid color-mix(in srgb,var(--hh-accent) 30%,transparent);
+        margin-right:.3rem; margin-bottom:.3rem; font-weight:500;
+        transition:background .2s, transform .18s;
+    }
+    .chip:hover { transform:scale(1.06); }
+    .job-detail-btn {
+        border:1.5px solid var(--hh-primary) !important; color:var(--hh-primary) !important;
+        border-radius:999px !important; font-size:.82rem; font-weight:600;
+        background:transparent !important; transition:all .2s !important;
+    }
+    .job-detail-btn:hover { background:var(--hh-primary) !important; color:#fff !important; transform:translateY(-1px); }
+
+    /* ── CTA Panel ── */
+    .cta-panel {
+        background:linear-gradient(145deg, var(--hh-footer) 0%, var(--hh-primary-dark) 100%);
+        border-radius:1.25rem; box-shadow:0 16px 40px rgba(0,0,0,.18);
+        position:relative; overflow:hidden;
+    }
+    /* subtle animated glow circle inside CTA */
+    .cta-panel::before {
+        content:''; position:absolute; width:200px; height:200px; border-radius:50%;
+        background:color-mix(in srgb,var(--hh-primary) 20%,transparent);
+        top:-60px; right:-60px; animation:hhOrbDrift 7s ease-in-out infinite;
+        pointer-events:none;
+    }
+    .cta-panel h4 { color:#fff; }
+    .cta-panel p  { color:rgba(255,255,255,.65); }
+    .cta-btn-light {
+        background:#fff !important; color:var(--hh-footer) !important; border:none !important;
+        border-radius:999px !important; font-weight:700;
+        transition:opacity .2s, transform .2s !important;
+    }
+    .cta-btn-light:hover { opacity:.92; transform:translateY(-2px); }
+    .cta-btn-outline {
+        border:1.5px solid rgba(255,255,255,.4) !important; color:#fff !important;
+        background:transparent !important; border-radius:999px !important; font-weight:600;
+        transition:all .2s !important;
+    }
+    .cta-btn-outline:hover { background:rgba(255,255,255,.12) !important; border-color:rgba(255,255,255,.7) !important; transform:translateY(-1px); }
+
+    /* ── Icon wrap ── */
+    .icon-wrap {
+        display:inline-flex; align-items:center; justify-content:center; border-radius:50%;
+        background:color-mix(in srgb,var(--hh-primary) 12%,var(--hh-bg));
+        color:var(--hh-primary); transition:background .4s;
+    }
+
+    /* ── Section headings ── */
+    .section-heading { color:var(--hh-ink); transition:color .4s; }
+    .section-sub     { color:var(--hh-navlink-color); transition:color .4s; }
+
+    /* ── Staggered reveal delays for repeated cards ── */
+    .hh-reveal-d1 { transition-delay:.05s !important; }
+    .hh-reveal-d2 { transition-delay:.13s !important; }
+    .hh-reveal-d3 { transition-delay:.21s !important; }
+    .hh-reveal-d4 { transition-delay:.29s !important; }
+</style>
+{% endblock %}
+
+{% block main %}
+
+<!-- ════════════════════ HERO ════════════════════ -->
+<section class="container-fluid home-hero py-5">
+    <!-- Floating orbs -->
+    <div class="hh-orb hh-orb-1"></div>
+    <div class="hh-orb hh-orb-2"></div>
+
+    <div class="container py-4">
+        <div class="row align-items-center g-4">
+
+            <div class="col-12 col-lg-7">
+                <div class="hero-tag">
+                    <span class="dot"></span> #1 Hiring Platform
+                </div>
+                <h1 class="display-5 fw-bold mb-3 hero-headline">
+                    Find Your Dream Job<br>with <span class="hero-shine">HireHub</span>
+                </h1>
+                <p class="lead hero-sub mb-4">
+                    Search thousands of opportunities and connect with top employers across industries.
+                </p>
+                <div class="d-flex flex-wrap gap-3 hero-btns">
+                    <a href="{% url 'register' %}" class="btn btn-lg hero-cta-primary">Create Account</a>
+                    <a href="{% url 'about' %}" class="btn btn-lg hero-cta-outline">Learn More</a>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-5">
+                <div class="hero-panel p-4">
+                    <h5 class="fw-bold mb-3">
+                        <span class="icon-wrap me-2" style="width:2rem;height:2rem;font-size:1rem;"><i class="fas fa-magnifying-glass"></i></span>
+                        Quick Job Search
+                    </h5>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Keyword</label>
+                        <input type="text" class="form-control" placeholder="Job title, skill, company">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Location</label>
+                        <input type="text" class="form-control" placeholder="City or remote">
+                    </div>
+                    <div class="d-grid">
+                        <button type="button" class="btn hero-search-btn">
+                            <i class="fas fa-search me-2"></i>Search Jobs
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ════════════════════ WHY + STATS ════════════════════ -->
+<section class="container-fluid py-5 section-bg">
+    <div class="container">
+        <div class="row g-4 align-items-stretch">
+
+            <div class="col-12 col-lg-7 hh-reveal">
+                <div class="why-panel h-100 p-4 p-md-5">
+                    <h2 class="fw-bold mb-2">Why HireHub Works Better</h2>
+                    <p class="text-light-emphasis mb-4">A focused platform for serious hiring and faster job discovery.</p>
+                    <div class="row g-4">
+                        <div class="col-12 col-md-4">
+                            <div class="why-item h-100">
+                                <div class="mb-2"><i class="fas fa-shield-halved" style="color:var(--hh-accent);font-size:1.3rem;"></i></div>
+                                <h5 class="fw-semibold">Verified Jobs</h5>
+                                <p class="mb-0 text-light-emphasis">Real openings from screened companies and teams.</p>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="why-item h-100">
+                                <div class="mb-2"><i class="fas fa-bolt" style="color:var(--hh-accent);font-size:1.3rem;"></i></div>
+                                <h5 class="fw-semibold">Fast Apply</h5>
+                                <p class="mb-0 text-light-emphasis">Apply quickly with profile-based applications.</p>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="why-item h-100">
+                                <div class="mb-2"><i class="fas fa-building" style="color:var(--hh-accent);font-size:1.3rem;"></i></div>
+                                <h5 class="fw-semibold">Top Employers</h5>
+                                <p class="mb-0 text-light-emphasis">Connect with active recruiters across industries.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-5 hh-reveal hh-reveal-d2">
+                <div class="stats-surface h-100 p-4 p-md-5">
+                    <h4 class="fw-bold mb-3">Platform Snapshot</h4>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="card stat-card text-center">
+                                <div class="card-body py-3">
+                                    <h4 class="fw-bold mb-1 hh-counter" data-target="12000" data-suffix="k+">12k+</h4>
+                                    <p class="mb-0">Job Seekers</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card stat-card text-center">
+                                <div class="card-body py-3">
+                                    <h4 class="fw-bold mb-1 hh-counter" data-target="3000" data-suffix="k+">3k+</h4>
+                                    <p class="mb-0">Companies</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card stat-card text-center">
+                                <div class="card-body py-3">
+                                    <h4 class="fw-bold mb-1 hh-counter" data-target="8000" data-suffix="k+">8k+</h4>
+                                    <p class="mb-0">Jobs Posted</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card stat-card text-center">
+                                <div class="card-body py-3">
+                                    <h4 class="fw-bold mb-1 hh-counter" data-target="96" data-suffix="%">96%</h4>
+                                    <p class="mb-0">Success Rate</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Categories -->
+        <div class="row mt-4">
+            <div class="col-12 hh-reveal">
+                <div class="categories-wrap">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+                        <h4 class="fw-bold mb-0 section-heading">Popular Job Categories</h4>
+                        <a href="#" class="btn btn-sm explore-btn">Explore All Categories</a>
+                    </div>
+                    <div class="d-flex flex-wrap">
+                        <span class="category-badge"><span>Software</span><span class="category-count">320 jobs</span></span>
+                        <span class="category-badge"><span>Marketing</span><span class="category-count">210 jobs</span></span>
+                        <span class="category-badge"><span>Design</span><span class="category-count">145 jobs</span></span>
+                        <span class="category-badge"><span>Finance</span><span class="category-count">98 jobs</span></span>
+                        <span class="category-badge"><span>Healthcare</span><span class="category-count">76 jobs</span></span>
+                        <span class="category-badge"><span>Sales</span><span class="category-count">182 jobs</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- ════════════════════ LATEST JOBS + CTA ════════════════════ -->
+<section class="container-fluid py-5 section-bg">
+    <div class="container">
+        <div class="row align-items-start g-4">
+
+            <!-- Latest Jobs -->
+            <div class="col-12 col-lg-7">
+                <div class="d-flex align-items-center justify-content-between mb-4 hh-reveal">
+                    <h3 class="fw-bold mb-0 section-heading">Latest Jobs</h3>
+                    <a href="#" class="btn btn-sm explore-btn">View All</a>
+                </div>
+
+                {% for job in newly_added %}
+                <div class="card job-card mb-3 hh-reveal" style="transition-delay:{{ forloop.counter0 }}00ms;">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h5 class="fw-bold mb-1">{{ job.title }}</h5>
+                                <p class="text-secondary mb-0 company-name">
+                                    <i class="fas fa-building me-1" style="font-size:.8rem;"></i>
+                                    {{ job.company.company_name }}
+                                </p>
+                            </div>
+                            <span class="job-badge">{{ job.get_job_type_display }}</span>
+                        </div>
+                        <div class="mb-3">
+                            {% for s in job.skills_required.all %}
+                            <span class="chip">{{ s.skill_name }}</span>
+                            {% endfor %}
+                        </div>
+                        <a href="{% url 'jobdetails' jobid=job.id %}" class="btn btn-sm job-detail-btn">
+                            View Details <i class="fas fa-arrow-right ms-1" style="font-size:.75rem;"></i>
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-5 hh-reveal" style="color:var(--hh-navlink-color);">
+                    <i class="fas fa-briefcase mb-3" style="font-size:2.5rem;opacity:.3;"></i>
+                    <p>No jobs posted yet. Check back soon!</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- CTA Panel -->
+            <div class="col-12 col-lg-5 hh-reveal hh-reveal-d2">
+                <div class="cta-panel p-4 p-md-5">
+                    <div class="mb-3" style="font-size:2.5rem; animation:hhFloat 3s ease-in-out infinite;">🚀</div>
+                    <h4 class="fw-bold mb-2">Ready to Get Hired?</h4>
+                    <p class="mb-4">Create your profile and start applying to jobs in minutes.</p>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'register' %}" class="btn cta-btn-light">Register Now</a>
+                        <a href="{% url 'login' %}" class="btn cta-btn-outline">Login</a>
+                        <a href="{% url 'contact' %}" class="btn cta-btn-outline">Need Help?</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* ── Stat Counter Animation ── */
+(function () {
+    var counters = document.querySelectorAll('.hh-counter');
+    if (!counters.length) return;
+
+    var triggered = false;
+    var statsEl = document.querySelector('.stats-surface');
+    if (!statsEl) return;
+
+    var io = new IntersectionObserver(function (entries) {
+        if (triggered) return;
+        entries.forEach(function (e) {
+            if (!e.isIntersecting) return;
+            triggered = true;
+            counters.forEach(function (el) {
+                var target = parseInt(el.getAttribute('data-target'), 10);
+                var suffix = el.getAttribute('data-suffix') || '';
+                var display = target >= 1000 ? Math.round(target / 1000) : target;
+                var label  = target >= 1000 ? (Math.round(target / 1000) + suffix) : (target + suffix);
+                var start  = 0;
+                var duration = 1800;
+                var step = duration / 60;
+                var inc  = display / (duration / (1000 / 60));
+                var cur  = 0;
+                var timer = setInterval(function () {
+                    cur += inc;
+                    if (cur >= display) { cur = display; clearInterval(timer); }
+                    el.textContent = (target >= 1000 ? Math.round(cur) + 'k+' : Math.round(cur) + suffix);
+                }, 1000 / 60);
+            });
+            io.disconnect();
+        });
+    }, { threshold: 0.4 });
+
+    io.observe(statsEl);
+})();
+</script>
+{% endblock %}

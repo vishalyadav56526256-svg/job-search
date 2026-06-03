@@ -1,0 +1,574 @@
+{% extends "jobseeker/jobseekerbase.html" %}
+{% load static %}
+
+{% block jobseeker %}
+<style>
+  @keyframes hhTabContent { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+  /* ── Page header ── */
+  .upd-header {
+    background:linear-gradient(135deg,
+      color-mix(in srgb,var(--hh-primary) 10%,var(--hh-card-bg)) 0%,
+      var(--hh-card-bg) 65%);
+    border:1px solid var(--hh-card-border);
+    border-radius:1.1rem; padding:1.25rem 1.5rem;
+    margin-bottom:1.1rem; position:relative; overflow:hidden;
+  }
+  .upd-header::before {
+    content:''; position:absolute; width:150px; height:150px; border-radius:50%;
+    background:color-mix(in srgb,var(--hh-accent) 8%,transparent);
+    top:-50px; right:-40px; pointer-events:none;
+  }
+  .upd-header h4 { color:var(--hh-ink); font-weight:700; margin:0 0 .2rem; }
+  .upd-header p  { color:var(--hh-muted); margin:0; font-size:.88rem; }
+
+  /* ── Tabs ── */
+  .upd-tabs {
+    display:flex; gap:.4rem; flex-wrap:wrap;
+    border:none; margin-bottom:0; padding:.2rem;
+    background:var(--hh-bg); border-radius:.85rem;
+    border:1px solid var(--hh-card-border);
+  }
+  .upd-tabs .nav-link {
+    border:none; border-radius:.65rem; padding:.55rem 1rem;
+    font-weight:600; font-size:.84rem; color:var(--hh-navlink-color);
+    background:transparent; transition:background .22s, color .22s, transform .18s;
+    display:flex; align-items:center; gap:6px;
+  }
+  .upd-tabs .nav-link:hover { background:var(--hh-navlink-hover-bg); color:var(--hh-navlink-hover-color); }
+  .upd-tabs .nav-link.active {
+    background:var(--hh-primary); color:#fff;
+    box-shadow:0 4px 14px color-mix(in srgb,var(--hh-primary) 30%,transparent);
+  }
+  .upd-tabs .nav-link i { font-size:.9rem; }
+
+  /* ── Panel ── */
+  .upd-panel {
+    background:var(--hh-card-bg);
+    border:1px solid var(--hh-card-border);
+    border-radius:1.1rem; padding:1.5rem;
+    margin-top:.75rem;
+    transition:background .4s;
+  }
+  .tab-pane.show.active .upd-panel { animation:hhTabContent .4s ease both; }
+
+  .upd-section-title {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:1.1rem; padding-bottom:.6rem;
+    border-bottom:2px solid var(--hh-card-border);
+  }
+  .upd-section-title h5 { margin:0; font-weight:700; color:var(--hh-ink); display:flex; align-items:center; gap:8px; }
+  .upd-section-title h5 i { color:var(--hh-primary); }
+  .upd-tag {
+    background:color-mix(in srgb,var(--hh-primary) 10%,var(--hh-bg));
+    border:1px solid color-mix(in srgb,var(--hh-primary) 22%,transparent);
+    color:var(--hh-primary-dark); border-radius:999px;
+    padding:.22rem .75rem; font-size:.75rem; font-weight:700;
+    transition:background .4s;
+  }
+
+  /* ── Form controls ── */
+  .form-label { color:var(--hh-ink); font-weight:600; font-size:.87rem; margin-bottom:.3rem; }
+
+  .form-control, .form-select {
+    background:var(--hh-bg) !important;
+    border:1.5px solid var(--hh-card-border) !important;
+    border-radius:.65rem !important;
+    color:var(--hh-ink) !important;
+    padding:.65rem .9rem !important;
+    font-size:.9rem;
+    transition:border-color .25s, box-shadow .25s, background .4s !important;
+  }
+  .form-control::placeholder { color:var(--hh-muted); opacity:.7; }
+  .form-control:focus, .form-select:focus {
+    border-color:var(--hh-primary) !important;
+    box-shadow:0 0 0 3px color-mix(in srgb,var(--hh-primary) 16%,transparent) !important;
+    outline:none;
+  }
+  .form-control:disabled, .form-control[disabled] {
+    opacity:.55; cursor:not-allowed;
+  }
+  textarea.form-control { min-height:100px; resize:vertical; }
+
+  /* ── Submit / Save buttons ── */
+  .upd-save-btn {
+    background:var(--hh-primary) !important; color:#fff !important;
+    border:none !important; border-radius:999px !important;
+    padding:.7rem 2rem; font-weight:700; font-size:.95rem;
+    cursor:pointer; width:100%;
+    transition:background .3s, transform .2s, box-shadow .2s !important;
+  }
+  .upd-save-btn:hover {
+    background:var(--hh-primary-dark) !important; transform:translateY(-2px);
+    box-shadow:0 8px 22px color-mix(in srgb,var(--hh-primary) 30%,transparent) !important;
+  }
+  .upd-save-btn:active { transform:scale(.97); }
+
+  .upd-add-btn {
+    background:var(--hh-accent) !important; color:#fff !important;
+    border:none !important; border-radius:999px !important;
+    padding:.5rem 1.2rem; font-weight:700; font-size:.85rem; cursor:pointer;
+    transition:filter .2s, transform .18s !important;
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .upd-add-btn:hover { filter:brightness(1.08); transform:translateY(-1px); }
+
+  /* ── Profile picture box ── */
+  .profile-box {
+    border:2px dashed var(--hh-card-border);
+    border-radius:1rem; background:var(--hh-bg);
+    text-align:center; padding:.85rem;
+    transition:border-color .25s, background .4s;
+  }
+  .profile-box:hover { border-color:var(--hh-primary); }
+  .profile-image {
+    width:130px; height:130px; border-radius:1rem; object-fit:cover;
+    border:2px solid var(--hh-primary);
+    box-shadow:0 8px 20px rgba(0,0,0,.1);
+    transition:transform .25s;
+  }
+  .profile-image:hover { transform:scale(1.04); }
+  .hint-text { font-size:.78rem; color:var(--hh-muted); margin:.4rem 0 0; }
+
+  /* ── Address block ── */
+  .addr-block {
+    border:1px solid var(--hh-card-border);
+    border-radius:1rem; padding:1rem 1.1rem;
+    background:color-mix(in srgb,var(--hh-primary) 4%,var(--hh-bg));
+    transition:background .4s;
+    margin-top:.5rem;
+  }
+
+  /* ── Edu cards ── */
+  .edu-card {
+    position:relative; border-left:4px solid var(--hh-primary);
+    border:1px solid var(--hh-card-border); border-left:4px solid var(--hh-primary);
+    border-radius:.85rem; padding:.9rem 1rem;
+    margin-bottom:.75rem; background:var(--hh-bg);
+    transition:transform .2s, background .4s;
+  }
+  .edu-card:hover { transform:translateX(3px); }
+  .edu-card h5 { color:var(--hh-ink); font-weight:700; margin-bottom:.15rem; }
+  .edu-card h6 { color:var(--hh-muted); font-weight:600; }
+  .edu-card p  { color:var(--hh-muted); font-size:.85rem; margin:0; }
+  .edu-years   { color:var(--hh-primary); font-weight:700; font-size:.82rem; margin-bottom:.2rem; }
+
+  .edu-empty {
+    border:1px dashed var(--hh-card-border); border-radius:.85rem;
+    padding:1rem; text-align:center; color:var(--hh-muted);
+    background:var(--hh-bg); font-size:.88rem;
+    margin-bottom:.75rem; transition:background .4s;
+  }
+
+  /* ── Exp cards ── */
+  .exp-card {
+    position:relative; border:1px solid var(--hh-card-border);
+    border-left:4px solid var(--hh-accent); border-radius:.85rem;
+    padding:.9rem 1rem; margin-bottom:.75rem;
+    background:var(--hh-bg); transition:transform .2s, background .4s;
+  }
+  .exp-card:hover { transform:translateX(3px); }
+  .exp-card h5 { color:var(--hh-ink); font-weight:700; }
+  .exp-card h6 { color:var(--hh-muted); font-weight:600; }
+  .exp-card p  { color:var(--hh-muted); font-size:.85rem; margin:.3rem 0 0; }
+
+  .del-btn {
+    background:#ef4444 !important; color:#fff !important; border:none !important;
+    border-radius:999px !important; padding:.3rem .7rem; font-size:.78rem;
+    transition:filter .2s, transform .18s !important;
+  }
+  .del-btn:hover { filter:brightness(1.1); transform:translateY(-1px); }
+
+  /* ── Skills ── */
+  .skill-tag {
+    display:inline-block; border-radius:999px;
+    background:color-mix(in srgb,var(--hh-primary) 12%,var(--hh-bg));
+    border:1px solid color-mix(in srgb,var(--hh-primary) 22%,transparent);
+    color:var(--hh-primary-dark); padding:.28rem .8rem;
+    font-size:.8rem; font-weight:600; margin:.25rem;
+    transition:transform .18s;
+  }
+  .skill-tag:hover { transform:scale(1.06); }
+
+  /* ── Toggle switch ── */
+  .form-check-input:checked {
+    background-color:var(--hh-primary) !important;
+    border-color:var(--hh-primary) !important;
+  }
+
+  /* ── Collapse form ── */
+  .add-form-wrap {
+    background:var(--hh-bg); border:1px solid var(--hh-card-border);
+    border-radius:1rem; padding:1.1rem;
+    margin-top:.75rem; transition:background .4s;
+  }
+</style>
+
+<div class="row">
+  <div class="col-12">
+
+    <!-- Header -->
+    <div class="upd-header hh-reveal">
+      <h4><i class="ti ti-edit me-2" style="color:var(--hh-primary);"></i>Update Your Profile</h4>
+      <p>Keep your details current so employers can find and evaluate you faster.</p>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav upd-tabs hh-reveal hh-d1" id="updTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab1" type="button">
+          <i class="ti ti-user"></i>Personal
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab2" type="button">
+          <i class="ti ti-school"></i>Education
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab3" type="button">
+          <i class="ti ti-building-factory"></i>Experience
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab4" type="button">
+          <i class="ti ti-file-plus"></i>Additional
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab5" type="button">
+          <i class="ti ti-code"></i>Skills
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content hh-reveal hh-d2">
+
+      <!-- ── TAB 1: Personal ── -->
+      <div class="tab-pane fade show active" id="tab1">
+        <div class="upd-panel">
+          <div class="upd-section-title">
+            <h5><i class="ti ti-user-circle"></i>Personal Details</h5>
+            <span class="upd-tag">Core Profile</span>
+          </div>
+          <form method="post" enctype="multipart/form-data" class="row g-3">
+            {% csrf_token %}
+            <div class="col-md-7 my-auto">
+              <label for="pro" class="form-label">Profile Picture</label>
+              <input type="file" name="picture" id="pro" class="form-control">
+              <p class="hint-text">A clear headshot helps recruiters trust your profile.</p>
+            </div>
+            <div class="col-md-5">
+              <div class="profile-box">
+                {% if js.picture %}
+                <img src="{{ js.picture.url }}" class="profile-image" alt="Profile">
+                {% else %}
+                <img src="{% static 'admin/assets/images/user/avatar-2.jpg' %}" class="profile-image" alt="Profile">
+                {% endif %}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label for="fn" class="form-label">First Name</label>
+              <input type="text" name="first_name" value="{{ js.first_name }}" id="fn" class="form-control">
+            </div>
+            <div class="col-md-6">
+              <label for="ln" class="form-label">Last Name</label>
+              <input type="text" name="last_name" value="{{ js.last_name }}" id="ln" class="form-control">
+            </div>
+            <div class="col-md-6">
+              <label for="dob" class="form-label">Date of Birth</label>
+              <input type="date" name="dob" value="{{ js.dob|date:'Y-m-d' }}" id="dob" class="form-control">
+            </div>
+            <div class="col-md-6">
+              <label for="gen" class="form-label">Gender</label>
+              <select name="gender" id="gen" class="form-select">
+                {% if js.gender %}
+                <option value="{{ js.gender }}" selected>{{ js.gender|title }}</option>
+                {% else %}
+                <option value="" selected disabled>Select Gender</option>
+                {% endif %}
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+                <option value="na">Prefer not to say</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="cn" class="form-label">Contact No</label>
+              <input type="number" name="contact_no" value="{{ js.contact_no }}" id="cn" class="form-control">
+            </div>
+            <div class="col-md-6">
+              <label for="em" class="form-label">Email</label>
+              <input type="email" name="email" value="{{ js.email }}" id="em" class="form-control" disabled>
+              <p class="hint-text">Email is locked to keep account identity consistent.</p>
+            </div>
+
+            <!-- Address -->
+            <div class="col-12">
+              <div class="addr-block">
+                <div class="upd-section-title mb-3">
+                  <h5><i class="ti ti-map-pin"></i>Address</h5>
+                  <span class="upd-tag">Location</span>
+                </div>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label">House / Building / Street</label>
+                    <input type="text" name="locality" value="{{ js.locality }}" class="form-control">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">City</label>
+                    <input type="text" name="city" value="{{ js.city }}" class="form-control">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">District</label>
+                    <input type="text" name="district" value="{{ js.district }}" class="form-control">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Zip Code</label>
+                    <input type="text" name="zip_code" value="{{ js.zip_code }}" class="form-control">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">State</label>
+                    <input type="text" name="state" value="{{ js.state }}" class="form-control">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Country</label>
+                    <input type="text" name="country" value="{{ js.country }}" class="form-control">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 mt-2">
+              <button type="submit" class="upd-save-btn">
+                <i class="ti ti-device-floppy me-2"></i>Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ── TAB 2: Education ── -->
+      <div class="tab-pane fade" id="tab2">
+        <div class="upd-panel">
+          <div class="upd-section-title">
+            <h5><i class="ti ti-school"></i>Educational Details</h5>
+            <span class="upd-tag">Academics</span>
+          </div>
+          {% for e in educations %}
+          <div class="edu-card">
+            <div class="edu-years">{{ e.start_year }} – {{ e.end_year }}</div>
+            <h5 class="mb-1">{{ e.degree_name|title }}</h5>
+            <h6>{{ e.specialization }}</h6>
+            <p>{{ e.institute }} – <strong>{{ e.university }}</strong></p>
+            <a href="" class="btn upd-save-btn position-absolute end-0 top-50 translate-middle-y me-3"
+               style="width:auto;padding:.3rem .75rem;font-size:.8rem;border-radius:999px !important;">
+              <i class="ti ti-edit" style="font-size:.85rem;"></i>
+            </a>
+          </div>
+          {% empty %}
+          <div class="edu-empty">No education details added yet.</div>
+          {% endfor %}
+
+          <div class="text-center mt-2">
+            <button class="upd-add-btn" type="button" data-bs-toggle="collapse"
+              data-bs-target="#addEduCollapse">
+              <i class="ti ti-plus"></i>Add Education
+            </button>
+          </div>
+
+          <div class="collapse mt-2" id="addEduCollapse">
+            <div class="add-form-wrap">
+              <form method="post" action="{% url 'save_education' %}" class="row g-3">
+                {% csrf_token %}
+                <div class="col-md-6">
+                  <label class="form-label">Degree</label>
+                  <select name="degree_name" class="form-select">
+                    <option value="" disabled selected>Select Degree</option>
+                    <option>High School</option><option>Intermediate</option>
+                    <option>Diploma</option><option value="bachelors">Bachelor's</option>
+                    <option value="masters">Master's</option><option>Phd</option><option>Other</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Specialization</label>
+                  <input type="text" name="specialization" class="form-control" placeholder="Branch">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Institute</label>
+                  <input type="text" name="institute" class="form-control" placeholder="College name">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">University</label>
+                  <input type="text" name="university" class="form-control" placeholder="University name">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Start Year</label>
+                  <input type="number" name="start_year" class="form-control" placeholder="20xx">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">End Year</label>
+                  <input type="number" name="end_year" class="form-control" placeholder="20xx">
+                </div>
+                <div class="col-12">
+                  <button class="upd-save-btn" type="submit">
+                    <i class="ti ti-device-floppy me-2"></i>Save Education
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAB 3: Experience ── -->
+      <div class="tab-pane fade" id="tab3">
+        <div class="upd-panel">
+          <div class="upd-section-title">
+            <h5><i class="ti ti-building-factory"></i>Experience</h5>
+            <span class="upd-tag">Work History</span>
+          </div>
+          {% for ex in experiences %}
+          <div class="exp-card">
+            <a href="" class="btn del-btn position-absolute end-0 top-50 translate-middle-y me-3">
+              <i class="ti ti-trash" style="font-size:.85rem;"></i>
+            </a>
+            <h5 class="mb-1">{{ ex.designation }}</h5>
+            <h6>{{ ex.company_name }}</h6>
+            <p>{{ ex.start_date }} – {{ ex.end_date }}</p>
+            {% if ex.description %}<p>{{ ex.description }}</p>{% endif %}
+          </div>
+          {% empty %}
+          <p style="color:var(--hh-muted); font-size:.88rem;">No experience added yet.</p>
+          {% endfor %}
+
+          <hr style="border-color:var(--hh-card-border);">
+
+          <p style="font-weight:700;color:var(--hh-ink); display:flex; align-items:center; gap:7px;">
+            <i class="ti ti-plus" style="color:var(--hh-primary);"></i>Add New Experience
+          </p>
+          <form method="post" action="{% url 'save_experience' %}" class="row g-3">
+            {% csrf_token %}
+            <div class="col-md-6">
+              <label class="form-label">Company / Organization</label>
+              <input type="text" name="company_name" class="form-control">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Designation</label>
+              <input type="text" name="designation" class="form-control">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Start Date</label>
+              <input type="date" name="start_date" class="form-control">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">End Date</label>
+              <input type="date" name="end_date" class="form-control">
+            </div>
+            <div class="col-12">
+              <label class="form-label">Description</label>
+              <textarea name="description" class="form-control"></textarea>
+            </div>
+            <div class="col-12">
+              <button type="submit" class="upd-save-btn">
+                <i class="ti ti-plus me-2"></i>Add Experience
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ── TAB 4: Additional ── -->
+      <div class="tab-pane fade" id="tab4">
+        <div class="upd-panel">
+          <div class="upd-section-title">
+            <h5><i class="ti ti-file-plus"></i>Additional Details</h5>
+            <span class="upd-tag">Pro Info</span>
+          </div>
+          <form action="{% url 'save_additional' %}" method="post" enctype="multipart/form-data" class="row g-3">
+            {% csrf_token %}
+            <div class="col-md-6">
+              <label class="form-label">Upload Resume</label>
+              <input type="file" name="resume" class="form-control">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Cover Letter (Optional)</label>
+              <input type="file" name="cover_letter" class="form-control">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Expected Salary (LPA)</label>
+              <input type="number" name="expected_salary" value="{{ js.expected_salary }}" class="form-control">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Current Salary (LPA)</label>
+              <input type="number" name="current_salary" value="{{ js.current_salary }}" class="form-control">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Notice Period (days)</label>
+              <input type="number" name="notice_period" value="{{ js.notice_period }}" class="form-control">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">LinkedIn URL</label>
+              <input type="text" name="linkedin_url" value="{{ js.linkedin_url }}" class="form-control">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">GitHub URL</label>
+              <input type="text" name="github_url" value="{{ js.github_url }}" class="form-control">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Portfolio URL</label>
+              <input type="text" name="portfolio_url" value="{{ js.portfolio_url }}" class="form-control">
+            </div>
+            <div class="col-md-6 d-flex align-items-center gap-3 mt-2">
+              <div class="form-check form-switch m-0">
+                <input type="checkbox" name="is_open_to_work" role="switch" class="form-check-input" id="work"
+                  {% if js.is_open_to_work %}checked{% endif %}>
+                <label for="work" class="form-check-label fw-semibold" style="color:var(--hh-ink);">Open to Work</label>
+              </div>
+            </div>
+            <div class="col-12 mt-2">
+              <button type="submit" class="upd-save-btn">
+                <i class="ti ti-device-floppy me-2"></i>Save Additional Info
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ── TAB 5: Skills ── -->
+      <div class="tab-pane fade" id="tab5">
+        <div class="upd-panel">
+          <div class="upd-section-title">
+            <h5><i class="ti ti-code"></i>Skills</h5>
+            <span class="upd-tag">Technical Skills</span>
+          </div>
+          <form method="post" action="{% url 'save_skill' %}">
+            {% csrf_token %}
+            <label class="form-label">Type Skills (comma separated)</label>
+            <input type="text" name="skills_input" class="form-control" list="skillsList"
+              placeholder="e.g. Python, Django, React"
+              value="{% for s in js.skills.all %}{{ s.skill_name }}{% if not forloop.last %}, {% endif %}{% endfor %}">
+            <datalist id="skillsList">
+              {% for skill in all_skills %}
+              <option value="{{ skill.skill_name }}">
+              {% endfor %}
+            </datalist>
+            <button type="submit" class="upd-save-btn mt-3">
+              <i class="ti ti-device-floppy me-2"></i>Save Skills
+            </button>
+          </form>
+
+          <div class="mt-4">
+            <p style="font-weight:700;color:var(--hh-ink);margin-bottom:.6rem;">Your Skills</p>
+            {% for skill in js.skills.all %}
+            <span class="skill-tag">{{ skill.skill_name }}</span>
+            {% empty %}
+            <p style="color:var(--hh-muted);font-size:.88rem;">No skills added yet.</p>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
